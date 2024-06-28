@@ -85,119 +85,114 @@ const AddPostPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-4/5  bg-white">
-        <div className=" align-center rounded-md shadow-md max-w-lg">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Create New Post
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <textarea
-                rows="1"
-                cols="50"
-                placeholder="Enter Title"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="h-14 text-5xl"
-              ></textarea>
-              {/* <input
+      <div className="bg-white p-8 rounded-md shadow-md w-full max-w-lg">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+          Create New Post
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="image" className="block text-gray-700 mb-2">
+              Image
+            </label>
+            <input
+              type="file"
+              id="image"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
+              onChange={handleImageChange}
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="title" className="block text-gray-700 mb-2">
+              Title
+            </label>
+            <input
               type="text"
               id="title"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-            /> */}
-            </div>
-            <div className="mb-4">
-              <textarea
-                rows="5"
-                cols="75"
-                id="description"
-                placeholder="Enter Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-                className="h-56 text-2xl"
-              ></textarea>
-              {/* <textarea
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="description" className="block text-gray-700 mb-2">
+              Description
+            </label>
+            <textarea
               id="description"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
-            /> */}
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="excerpt" className="block text-gray-700 mb-2">
+              Excerpt
+            </label>
+            <textarea
+              id="excerpt"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              type="file"
+              id="image"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
+              onChange={handleImageChange}
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              type="text"
+              id="tags"
+              placeholder="Enter Tags"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
+              value={tagInput}
+              onChange={handleTagInputChange}
+              onKeyDown={handleTagKeyDown}
+            />
+            <div className="mt-2">
+              {tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
+                  onClick={() => removeTag(index)}
+                >
+                  #{tag} &times;
+                </span>
+              ))}
             </div>
-            <div className="mb-4">
-              <label htmlFor="excerpt" className="block text-gray-700 mb-2">
-                Excerpt
-              </label>
-              <textarea
-                id="excerpt"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <input
-                type="file"
-                id="image"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
-                onChange={handleImageChange}
-              />
-            </div>
-            <div className="mb-4">
-              <input
-                type="text"
-                id="tags"
-                placeholder="Enter Tags"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
-                value={tagInput}
-                onChange={handleTagInputChange}
-                onKeyDown={handleTagKeyDown}
-              />
-              <div className="mt-2">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
-                    onClick={() => removeTag(index)}
-                  >
-                    #{tag} &times;
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="mb-4">
-              <input
-                type="text"
-                id="author"
-                placeholder="Author Name"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-500"
-              >
-                Add Post
-              </button>
-            </div>
-          </form>
-          {message && (
-            <div className="mt-4 p-2 text-center text-white bg-green-500 rounded">
-              {message}
-            </div>
-          )}
-        </div>
+          </div>
+          <div className="mb-4">
+            <input
+              type="text"
+              id="author"
+              placeholder="Author Name"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-500"
+            >
+              Add Post
+            </button>
+          </div>
+        </form>
+        {message && (
+          <div className="mt-4 p-2 text-center text-white bg-green-500 rounded">
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );
