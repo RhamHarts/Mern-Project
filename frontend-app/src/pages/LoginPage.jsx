@@ -13,10 +13,10 @@ const LoginPage = () => {
   const handleLogin = async (username, password) => {
     try {
       // Lakukan login pengguna
-      const response = await axios.post(
-        "http://localhost:3000/api/user/login",
-        { username, password }
-      );
+      const response = await axios.post("http://localhost:3001/login", {
+        username,
+        password,
+      });
       console.log("Login successful:", response.data);
 
       // Setelah login berhasil, simpan token di local storage dan set header Authorization

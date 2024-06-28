@@ -9,7 +9,7 @@ const PostList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/posts");
+        const response = await axios.get("http://localhost:3001/posts");
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching the posts:", error);
@@ -30,7 +30,7 @@ const PostList = () => {
                 src={
                   post.image.startsWith("http")
                     ? post.image
-                    : `http://localhost:3000/uploads/${post.image}`
+                    : `http://localhost:3001/uploads/${post.image}`
                 }
                 alt={post.title}
               />

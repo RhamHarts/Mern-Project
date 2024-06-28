@@ -1,22 +1,13 @@
-// components/ProtectedRoute.jsx
-import React, { useContext } from 'react';
-import { Route, Redirect } from 'react-router-dom';
-import { AuthContext } from './authcontext';
+// src/components/PrivateRoute.js
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/authcontext";
 
-const ProtectedRoute = ({ component: Component, role, ...rest }) => {
-  const { user } = useContext(AuthContext);
-  return (
-    <Route
-      {...rest}
-      render={props =>
-        user && user.role === role ? (
-          <Component {...props} />
-        ) : (
-          <Redirect to="/" />
-        )
-      }
-    />
-  );
+const PrivateRoute = ({ element: Element, ...rest }) => {
+  const { token } = useContext(AuthContext);
+
+  return token ? <Element {...rest} /> : <Navigate to="/LoginPage" />;
 };
 
-export default ProtectedRoute;
+export default PrivateRoute;

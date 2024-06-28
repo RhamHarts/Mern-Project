@@ -11,7 +11,7 @@ const path = require('path');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 connectDB();
 
@@ -21,11 +21,11 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use('/api/posts', postRoutes);
+app.use('/posts', postRoutes);
 
-app.use('/api/user', userRoutes);
+app.use('/', userRoutes);
 
-app.use('/api/profile', profileRoutes);
+app.use('/profile', profileRoutes);
 
 
 

@@ -13,10 +13,10 @@ const RegisterPage = () => {
   const handleRegister = async (username, password) => {
     try {
       // Registrasi pengguna
-      const response = await axios.post(
-        "http://localhost:3000/api/user/register",
-        { username, password }
-      );
+      const response = await axios.post("http://localhost:3001/register", {
+        username,
+        password,
+      });
       console.log("Registration successful:", response.data);
 
       // Auto-login setelah registrasi berhasil

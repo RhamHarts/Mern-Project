@@ -31,7 +31,7 @@ const PostDetail = () => {
         src={
           post.image.startsWith("http")
             ? post.image
-            : `http://localhost:3000/uploads/${post.image}`
+            : `http://localhost:3001/uploads/${post.image}`
         }
         alt={post.title}
       />
