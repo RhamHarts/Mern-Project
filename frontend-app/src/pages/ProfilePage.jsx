@@ -1,33 +1,13 @@
-import React, { useState, useEffect } from "react";
-// import { AuthContext } from "../../public/ahok.jpg";
+import React, { useState } from "react";
+import axios from "axios";
 
 const ProfilePage = () => {
-  // const { user, updateProfile } = useContext(AuthContext);
-  const user = {
-    username: "dummyUser",
-    author: "Dummy Author",
-    birthDate: "2000-01-01",
-    email: "dummy@example.com",
-    imageProfile: "https://via.placeholder.com/150",
-  };
-
   const [formData, setFormData] = useState({
     author: "",
-    birthDate: "",
+    dateBirth: "",
     email: "",
-    imageProfile: "",
+    imageProfile: null,
   });
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        author: user.author || "",
-        birthDate: user.birthDate || "",
-        email: user.email || "",
-        imageProfile: user.imageProfile || "",
-      });
-    }
-  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,82 +18,66 @@ const ProfilePage = () => {
   };
 
   const handleFileChange = (e) => {
-    const { name, files } = e.target;
+    const file = e.target.files[0];
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: files[0],
+      imageProfile: file,
     }));
   };
 
-  // const handleFormSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const updatedFormData = new FormData();
-  //   updatedFormData.append("author", formData.author);
-  //   updatedFormData.append("birthDate", formData.birthDate);
-  //   updatedFormData.append("email", formData.email);
-  //   if (formData.imageProfile) {
-  //     updatedFormData.append("imageProfile", formData.imageProfile);
-  //   }
-  //   try {
-  //     await updateProfile(updatedFormData);
-  //     alert("Profile updated successfully");
-  //   } catch (error) {
-  //     alert("Failed to update profile");
-  //   }
-  // };
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    const updatedFormData = new FormData();
+    updatedFormData.append("author", formData.author);
+    updatedFormData.append("dateBirth", formData.dateBirth);
+    updatedFormData.append("email", formData.email);
+    if (formData.imageProfile) {
+      updatedFormData.append("imageProfile", formData.imageProfile);
+    }
 
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/profile",
+        updatedFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      alert("Profile updated successfully");
+    } catch (error) {
+      alert("Failed to update profile");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 ">
-      {/* <div className="">
-        <img className="w-full h-32" alt="" src="./ahok.jpg" />
-      </div> */}
-
-      <label htmlFor="imageProfile">
-        <img
-          src={formData.imageProfile}
-          alt="Profile"
-          className="w-full h-32 cursor-pointer"
-        />
-        <input
-          type="file"
-          id="imageProfile"
-          name="imageProfile"
-          accept=".png, .jpg, .jpeg"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </label>
-      <label htmlFor="imageProfile2">
-        <img
-          src={formData.imageProfile2}
-          className="w-48 h-48 rounded-full bg-red-500  cursor-pointer absolute top-32 left-10"
-        />
-        <input
-          type="file"
-          id="imageProfile"
-          name="imageProfile"
-          accept=".png, .jpg, .jpeg"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </label>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg flex flex-col ml-96 justify-center content-center">
-        <label htmlFor="username" className="mb-1 text-gray-600 font-semibold">
-          UserName
-        </label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          value={formData.username}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2"
-        />
-        <form className="space-y-4 w-full">
+    <div className="min-h-screen bg-gray-100">
+      <form onSubmit={handleFormSubmit}>
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg flex flex-col ml-96 justify-center content-center">
+          <div className="flex flex-col">
+            <label
+              htmlFor="imageProfile"
+              className="mb-1 text-gray-600 font-semibold"
+            >
+              Profile Image
+            </label>
+            <input
+              type="file"
+              id="imageProfile"
+              name="imageProfile"
+              accept=".png, .jpg, .jpeg"
+              onChange={handleFileChange}
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            {formData.imageProfile && (
+              <img
+                src={URL.createObjectURL(formData.imageProfile)}
+                alt="Profile Preview"
+                className="w-full h-32 mt-2 bg-gray-500"
+              />
+            )}
+          </div>
           <div className="flex flex-col">
             <label
               htmlFor="author"
@@ -132,16 +96,16 @@ const ProfilePage = () => {
           </div>
           <div className="flex flex-col">
             <label
-              htmlFor="birthDate"
+              htmlFor="dateBirth"
               className="mb-1 text-gray-600 font-semibold"
             >
               Birth Date
             </label>
             <input
               type="date"
-              id="birthDate"
-              name="birthDate"
-              value={formData.birthDate}
+              id="dateBirth"
+              name="dateBirth"
+              value={formData.dateBirth}
               onChange={handleInputChange}
               className="border border-gray-300 rounded-lg px-3 py-2"
             />
@@ -165,8 +129,8 @@ const ProfilePage = () => {
           >
             Update Profile
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };

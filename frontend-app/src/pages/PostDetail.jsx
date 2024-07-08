@@ -29,9 +29,11 @@ const PostDetail = () => {
       <img
         className="w-full mb-4 mt-10"
         src={
-          post.image.startsWith("http")
-            ? post.image
-            : `http://localhost:3001/uploads/${post.image}`
+          post.image // Check for image first
+            ? `http://localhost:3001/uploads/post/${post.image}`
+            : post.imageUrl // If no image, check for imageUrl
+            ? post.imageUrl
+            : "path/to/default/image.jpg" // Provide a default image in case both are missing
         }
         alt={post.title}
       />

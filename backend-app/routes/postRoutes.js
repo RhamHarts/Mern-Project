@@ -5,19 +5,19 @@ const { getPosts, createPost, getPostById } = require('../controllers/postContro
 
 const router = express.Router();
 
+// Konfigurasi multer
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads/post'));
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage: storage });
-
 router.get('/', getPosts);
 router.post('/', upload.single('image'), createPost);
-router.get('/:id', getPostById); // Route untuk get post by id
+router.get('/:id', getPostById);
 
 module.exports = router;

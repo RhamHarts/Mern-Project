@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -13,22 +12,26 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Koneksi ke database MongoDB
 connectDB();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// Serve static files from the "uploads" directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Static file uploads/post
+app.use('/uploads/post', express.static(path.join(__dirname, '/uploads/post')));
+
+// Routes
 app.use('/posts', postRoutes);
-
 app.use('/', userRoutes);
 
+// Static file uploads/profile
+app.use('/uploads/profile', express.static(path.join(__dirname, '/uploads/profile')));
 app.use('/profile', profileRoutes);
 
-
-
+// Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

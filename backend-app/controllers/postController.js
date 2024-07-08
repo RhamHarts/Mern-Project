@@ -22,24 +22,39 @@ const getPostById = async (req, res) => {
 };
 
 const createPost = async (req, res) => {
-  const { title, description, excerpt, tags, author } = req.body;
-  const image = req.file ? req.file.filename : '';
-
-  const post = new Post({
-    title,
-    description,
-    excerpt,
-    tags: tags.split(',').map((tag) => tag.trim()),
-    image,
-    author,
-  });
-
   try {
-    const newPost = await post.save();
+    const { title, description, excerpt,  author, tags, date, imageUrl } = req.body;
+
+    let imageFile = null;
+
+    // Check if image is a URL or a file upload
+    if (imageUrl && imageUrl.startsWith('http')) {
+      // If image is a URL, use imageUrl field
+      imageFile = null;
+    } else if (req.file) {
+      // If image is an uploaded file, use the filename
+      imageFile = req.file.filename;
+    }
+
+    const newPost = new Post({
+      title,
+      description,
+      excerpt,
+      author,
+      tags: tags.split(',').map((tag) => tag.trim()),
+      date,
+      image: imageFile,
+      imageUrl: imageUrl || null, // Assign imageUrl if provided
+    });
+
+    await newPost.save();
     res.status(201).json(newPost);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating post', error });
   }
 };
+
+
+
 
 module.exports = { getPosts, getPostById, createPost };

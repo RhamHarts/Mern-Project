@@ -25,7 +25,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-black p-4 flex flex-wrap justify-between items-center">
+    <nav className="bg-black p-4 flex flex-wrap justify-between items-center overflow-hidden">
       <div className="text-white text-xl">
         <Link to="/">MyBlog</Link>
       </div>
@@ -36,7 +36,7 @@ const Navbar = () => {
             placeholder="Search"
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-opacity-50"
+            className="w-full px-5 py-2 rounded-md focus:outline-none focus:ring focus:ring-opacity-50"
           />
         </form>
       </div>

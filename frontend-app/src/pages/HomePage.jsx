@@ -11,7 +11,7 @@ const HomePage = () => {
       <header className="bg-black text-white py-4"></header>
 
       <main className="container mx-auto flex-grow">
-        <section className="container mx-auto px-8 py-8 lg:py-20">
+        <section className="container px-5 py-5 ">
           {user ? `Welcome, ${user.username}!` : "Welcome to MyBlog"}
           <PostList />
         </section>

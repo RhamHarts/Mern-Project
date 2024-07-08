@@ -1,6 +1,6 @@
 // src/services/UserService.js
 
-const REGISTER_URL = 'http://localhost:3000/api/register';
+const REGISTER_URL = 'http://localhost:3001/register';
 
 export const registerUser = async (user) => {
   try {

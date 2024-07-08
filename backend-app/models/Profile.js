@@ -14,6 +14,9 @@ const ProfileSchema = new mongoose.Schema({
   imageProfile: {
     type: String
   },
+  imageProfile2: {
+    type: String
+  },
   email: {
     type: String,
     required: true,

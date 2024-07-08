@@ -1,4 +1,3 @@
-// src/components/PostList.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom"; // Import Link from React Router
@@ -28,15 +27,17 @@ const PostList = () => {
               <img
                 className="w-full h-80 object-cover"
                 src={
-                  post.image.startsWith("http")
-                    ? post.image
-                    : `http://localhost:3001/uploads/${post.image}`
+                  post.image // Check for image first
+                    ? `http://localhost:3001/uploads/post/${post.image}`
+                    : post.imageUrl // If no image, check for imageUrl
+                    ? post.imageUrl
+                    : "path/to/default/image.jpg" // Provide a default image in case both are missing
                 }
                 alt={post.title}
               />
               <div className="px-6 py-4">
                 <div className="font-bold text-xl mb-2">{post.title}</div>
-                <p className="text-gray-700 text-base">{post.description}</p>
+                <p className="text-gray-700 text-base">{post.excerpt}</p>
               </div>
               <div className="px-6 pt-4 pb-2 flex justify-between items-center">
                 <div className="flex">
