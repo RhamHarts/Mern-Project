@@ -20,16 +20,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static file uploads/post
+// Static file
 app.use('/uploads/post', express.static(path.join(__dirname, '/uploads/post')));
+app.use('/uploads/profile', express.static(path.join(__dirname, '/uploads/profile')));
 
 // Routes
 app.use('/posts', postRoutes);
 app.use('/', userRoutes);
-
-// Static file uploads/profile
-app.use('/uploads/profile', express.static(path.join(__dirname, '/uploads/profile')));
 app.use('/profile', profileRoutes);
+
+
+
 
 // Start server
 app.listen(port, () => {

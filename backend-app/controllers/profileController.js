@@ -2,24 +2,6 @@ const Profile = require('../models/Profile'); // Mengimpor model Profile
 const User = require('../models/User');
 const Post = require('../models/Post');
 
-exports.getProfileWithPosts = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    
-    // Fetch user profile
-    const user = await User.findById(userId);
-
-    // Fetch posts by user
-    const posts = await Post.find({ userId: userId });
-
-    res.status(200).json({ user, posts });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server Error' });
-  }
-};
-
-
 // Definisi fungsi createOrUpdateProfile
 exports.createOrUpdateProfile = async (req, res) => {
   try {
@@ -58,6 +40,45 @@ exports.createOrUpdateProfile = async (req, res) => {
       await profile.save();
       return res.status(201).json({ success: true, profile });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+
+
+exports.getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Mengambil userId dari data autentikasi
+
+    // Cari profil berdasarkan userId
+    const profile = await Profile.findOne({ user: userId });
+
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Profile not found' });
+    }
+
+    // Jika profil ditemukan, kirimkan respons dengan profil
+    res.status(200).json({ success: true, profile });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+// Fungsi untuk mengambil data profil pengguna yang ada beserta postingannya
+exports.getProfileWithPosts = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Fetch user profile
+    const user = await User.findById(userId);
+
+    // Fetch posts by user
+    const posts = await Post.find({ userId: userId });
+
+    res.status(200).json({ user, posts });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });

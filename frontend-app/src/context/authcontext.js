@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get("http://localhost:3001/profile");
-      setUser(response.data.user);
+      setUser(response.data.profile); // Adjust to match your API response structure
     } catch (error) {
       console.error("Profile fetch failed:", error);
       setUser(null);
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         },
       };
       const response = await axios.post("http://localhost:3001/profile", formData, config);
-      setUser(response.data.user);
+      setUser(response.data.profile); // Assuming your API responds with updated profile data
     } catch (error) {
       console.error("Profile update failed:", error);
       throw error;
