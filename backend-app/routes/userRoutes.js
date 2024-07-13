@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, getUserProfile, updateUserProfile } = require('../controllers/userController');
-const { verifyToken } = require('../middleware/auth');
+const { registerUser, loginUser   } = require('../controllers/userController');
 
 // Route for user registration
 router.post('/register', async (req, res) => {
@@ -23,15 +22,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Route for user profile
-router.get('/profile', verifyToken, async (req, res) => {
-  try {
-    await getUserProfile(req, res);
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+
 
 
 module.exports = router;

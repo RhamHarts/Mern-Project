@@ -46,6 +46,16 @@ exports.createOrUpdateProfile = async (req, res) => {
   }
 };
 
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json({ user });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 
 
 exports.getProfile = async (req, res) => {
@@ -61,6 +71,22 @@ exports.getProfile = async (req, res) => {
 
     // Jika profil ditemukan, kirimkan respons dengan profil
     res.status(200).json({ success: true, profile });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+
+
+
+exports.getAllProfiles = async (req, res) => {
+  try {
+    // Ambil semua profil dari koleksi Profile
+    const profiles = await Profile.find();
+
+    // Jika profil ditemukan, kirimkan respons dengan profil
+    res.status(200).json({ success: true, profiles });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });

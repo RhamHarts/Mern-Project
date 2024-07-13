@@ -1,4 +1,3 @@
-// src/context/authcontext.js
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
@@ -6,6 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
@@ -13,14 +13,32 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setToken(storedToken);
       axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
-      fetchUserProfile();
+      fetchUserProfile(storedToken);
     }
   }, []);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = async (token) => {
     try {
-      const response = await axios.get("http://localhost:3001/profile");
-      setUser(response.data.profile); // Adjust to match your API response structure
+      const response = await axios.get("http://localhost:3001/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUser(response.data.user); // Pastikan menggunakan 'profile' sesuai dengan respons dari server
+    } catch (error) {
+      console.error("Profile fetch failed:", error);
+      setUser(null);
+    }
+  };
+
+  const fetchUserProfileNow = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:3001/profile/now", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUser(response.data.profile); // Pastikan menggunakan 'profile' sesuai dengan respons dari server
     } catch (error) {
       console.error("Profile fetch failed:", error);
       setUser(null);
@@ -48,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", res.data.token);
       setToken(res.data.token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
-      fetchUserProfile();
+      fetchUserProfile(res.data.token);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -70,8 +88,8 @@ export const AuthProvider = ({ children }) => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.post("http://localhost:3001/profile", formData, config);
-      setUser(response.data.profile); // Assuming your API responds with updated profile data
+      const response = await axios.post("http://localhost:3001/profile/now", formData, config);
+      setUser(response.data.user);
     } catch (error) {
       console.error("Profile update failed:", error);
       throw error;
@@ -79,7 +97,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user,profile, token, login, register, logout, updateProfile, fetchUserProfile, fetchUserProfileNow, }}>
       {children}
     </AuthContext.Provider>
   );

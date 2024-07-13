@@ -4,7 +4,7 @@ import { AuthContext } from "../context/authcontext";
 import PostList from "../components/PostList";
 
 const HomePage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, profile } = useContext(AuthContext);
 
   return (
     <div className="bg-white min-h-screen flex flex-col justify-between">
@@ -13,6 +13,7 @@ const HomePage = () => {
       <main className="container mx-auto flex-grow">
         <section className="container px-5 py-5 ">
           {user ? `Welcome, ${user.username}!` : "Welcome to MyBlog"}
+          {profile ? `Welcome, ${profile.author}!` : "Welcome to MyBlog"}
           <PostList />
         </section>
       </main>

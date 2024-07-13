@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createOrUpdateProfile, getProfile, getProfileWithPosts } = require('../controllers/profileController');
+const { createOrUpdateProfile, getProfile, getProfileWithPosts,getAllProfiles,getUserProfile } = require('../controllers/profileController');
 const { verifyToken } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
@@ -17,13 +17,25 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Route for user profile
+router.get('/', verifyToken, async (req, res) => {
+  try {
+    await getUserProfile(req, res);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/all', verifyToken, getAllProfiles);
+
 // Route untuk mengambil profil pengguna yang ada
-router.get('/', verifyToken, getProfile);
+router.get('/now', verifyToken, getProfile);
 
 // Route untuk mengambil profil pengguna beserta postingannya
 router.get('/profile/posts', verifyToken, getProfileWithPosts);
 
 // Route untuk membuat atau mengupdate profil pengguna
-router.post('/', verifyToken, upload.single('imageProfile'), createOrUpdateProfile);
+router.post('/now', verifyToken, upload.single('imageProfile'), createOrUpdateProfile);
 
 module.exports = router;
