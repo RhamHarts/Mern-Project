@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/authcontext";
 
 const AddPostPage = () => {
+  const { user } = useContext(AuthContext); // Mengambil user dari AuthContext
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -29,12 +31,18 @@ const AddPostPage = () => {
       return;
     }
 
+    if (!user) {
+      setMessage("User not authenticated.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("excerpt", excerpt);
     formData.append("tags", tags.join(","));
     formData.append("author", author);
+    formData.append("userId", user.id); // Menambahkan userId
     if (image) {
       formData.append("image", image);
     } else if (imageUrl) {
@@ -192,7 +200,7 @@ const AddPostPage = () => {
             <div className="mb-4">
               <img
                 src={previewUrl}
-                alt="Image preview"
+                alt="Preview"
                 className="w-full h-auto rounded-md"
               />
             </div>

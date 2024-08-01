@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { getPosts, createPost, getPostById } = require('../controllers/postController');
+const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -16,8 +17,14 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
+// Rute untuk mendapatkan semua postingan
 router.get('/', getPosts);
-router.post('/', upload.single('image'), createPost);
+
+// Rute untuk membuat postingan dengan middleware autentikasi dan upload file
+router.post('/', authMiddleware.verifyToken, upload.single('image'), createPost);
+
+// Rute untuk mendapatkan postingan berdasarkan ID
 router.get('/:id', getPostById);
 
 module.exports = router;

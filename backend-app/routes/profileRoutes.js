@@ -33,7 +33,7 @@ router.get('/all', verifyToken, getAllProfiles);
 router.get('/now', verifyToken, getProfile);
 
 // Route untuk mengambil profil pengguna beserta postingannya
-router.get('/profile/posts', verifyToken, getProfileWithPosts);
+router.get('/posts', verifyToken, getProfileWithPosts);
 
 // Route untuk membuat atau mengupdate profil pengguna
 router.post('/now', verifyToken, upload.single('imageProfile'), createOrUpdateProfile);

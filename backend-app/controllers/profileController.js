@@ -93,20 +93,24 @@ exports.getAllProfiles = async (req, res) => {
   }
 };
 
-// Fungsi untuk mengambil data profil pengguna yang ada beserta postingannya
 exports.getProfileWithPosts = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     // Fetch user profile
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('-password'); // Exclude password from response
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
     // Fetch posts by user
     const posts = await Post.find({ userId: userId });
 
-    res.status(200).json({ user, posts });
+    res.status(200).json({ success: true, user, posts });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+

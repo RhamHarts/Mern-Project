@@ -11,6 +11,7 @@ const ProfilePage = () => {
 
   const [profileData, setProfileData] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -54,6 +55,17 @@ const ProfilePage = () => {
       ...prevFormData,
       imageProfile: file,
     }));
+
+    // Preview the selected image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
   };
 
   const toggleEditMode = () => {
@@ -106,43 +118,46 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+    <div className="min-h-screen flex justify-center items-center">
       <form
         onSubmit={handleFormSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md flex flex-col"
+        className="relative bottom-40 bg-gray-200 p-8 rounded-lg shadow-lg w-full max-w-md flex flex-col"
       >
-        <label
-          htmlFor="imageProfile"
-          className="flex justify-center mb-4 relative cursor-pointer"
-        >
-          {formData.imageProfile ? (
-            <img
-              src={formData.imageProfile}
-              alt="Profile Preview"
-              className="w-32 h-32 object-cover rounded-full"
-            />
-          ) : profileData?.imageProfile ? (
-            <img
-              src={`http://localhost:3001/${profileData.imageProfile}`}
-              alt="Profile"
-              className="w-32 h-32 object-cover rounded-full"
-            />
-          ) : (
-            <div className="w-32 h-32 flex justify-center items-center border-2 border-dashed border-gray-400 rounded-full">
-              <span className="text-gray-400">Upload Image</span>
-            </div>
-          )}
-          {isEditMode && (
-            <input
-              type="file"
-              id="imageProfile"
-              name="imageProfile"
-              accept=".png, .jpg, .jpeg"
-              onChange={handleFileChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          )}
-        </label>
+        {profileData && (
+          <div className="flex flex-col items-center mb-4">
+            {isEditMode ? (
+              <>
+                <input
+                  type="file"
+                  id="imageProfile"
+                  name="imageProfile"
+                  accept=".png, .jpg, .jpeg"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="imageProfile"
+                  className="flex items-center cursor-pointer"
+                >
+                  <img
+                    src={
+                      imagePreview ||
+                      `http://localhost:3001/uploads/profile/${formData.imageProfile}`
+                    }
+                    alt="Profile Image"
+                    className="w-full h-32 mb-4 cursor-pointer"
+                  />
+                </label>
+              </>
+            ) : (
+              <img
+                src={`http://localhost:3001/uploads/profile/${formData.imageProfile}`}
+                alt="Profile Image"
+                className="w-full h-32 mb-4"
+              />
+            )}
+          </div>
+        )}
         <div className="flex flex-col">
           <label htmlFor="author" className="mb-1 text-gray-600 font-semibold">
             Author

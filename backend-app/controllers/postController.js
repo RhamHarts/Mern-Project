@@ -23,16 +23,13 @@ const getPostById = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { title, description, excerpt,  author, tags, date, imageUrl } = req.body;
+    const { title, description, excerpt, author, tags, date, imageUrl } = req.body;
+    const userId = req.user.id; // Mengambil userId dari req.user
 
     let imageFile = null;
-
-    // Check if image is a URL or a file upload
     if (imageUrl && imageUrl.startsWith('http')) {
-      // If image is a URL, use imageUrl field
       imageFile = null;
     } else if (req.file) {
-      // If image is an uploaded file, use the filename
       imageFile = req.file.filename;
     }
 
@@ -44,7 +41,8 @@ const createPost = async (req, res) => {
       tags: tags.split(',').map((tag) => tag.trim()),
       date,
       image: imageFile,
-      imageUrl: imageUrl || null, // Assign imageUrl if provided
+      imageUrl: imageUrl || null,
+      userId: userId, // Menyimpan userId di post
     });
 
     await newPost.save();

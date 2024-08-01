@@ -5,7 +5,6 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
@@ -97,7 +96,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user,profile, token, login, register, logout, updateProfile, fetchUserProfile, fetchUserProfileNow, }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateProfile, fetchUserProfile, fetchUserProfileNow, }}>
       {children}
     </AuthContext.Provider>
   );
