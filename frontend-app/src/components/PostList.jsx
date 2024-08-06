@@ -18,6 +18,14 @@ const PostList = () => {
     fetchPosts();
   }, []);
 
+  // Function to truncate text to a specified number of words
+  const truncateText = (text, numWords) => {
+    if (!text) return "";
+    const words = text.split(" ");
+    if (words.length <= numWords) return text;
+    return words.slice(0, numWords).join(" ") + "...";
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -37,7 +45,9 @@ const PostList = () => {
               />
               <div className="px-6 py-4">
                 <div className="font-bold text-xl mb-2">{post.title}</div>
-                <p className="text-gray-700 text-base">{post.excerpt}</p>
+                <p className="text-gray-700 text-base">
+                  {truncateText(post.excerpt, 20)}
+                </p>
               </div>
               <div className="px-6 pt-4 pb-2 flex justify-between items-center">
                 <div className="flex">

@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authcontext";
 
 const AddPostPage = () => {
-  const { user } = useContext(AuthContext); // Mengambil user dari AuthContext
+  const { user } = useContext(AuthContext);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -16,6 +16,14 @@ const AddPostPage = () => {
   const [previewUrl, setPreviewUrl] = useState("");
   const [useImageUrl, setUseImageUrl] = useState(false); // State baru untuk memilih input gambar atau URL
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      console.log("User ID:", user._id); // Log user ID menggunakan _id jika user tersedia
+    } else {
+      console.log("No user logged in"); // Log jika user belum login
+    }
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +51,7 @@ const AddPostPage = () => {
     formData.append("tags", tags.join(","));
     formData.append("author", author);
     formData.append("userId", user.id); // Menambahkan userId
+
     if (image) {
       formData.append("image", image);
     } else if (imageUrl) {
@@ -50,8 +59,12 @@ const AddPostPage = () => {
     }
 
     try {
+      const token = localStorage.getItem("token"); // Ambil token dari localStorage
       const response = await fetch("http://localhost:3001/posts", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, // Tambahkan token ke header Authorization
+        },
         body: formData,
       });
 
@@ -62,6 +75,7 @@ const AddPostPage = () => {
       const result = await response.json();
       console.log("Success:", result);
 
+      // Reset form setelah berhasil disubmit
       setTitle("");
       setDescription("");
       setExcerpt("");
@@ -73,10 +87,11 @@ const AddPostPage = () => {
       setTagInput("");
       setMessage("Berhasil diposting!");
 
+      // Redirect ke homepage setelah 2 detik
       setTimeout(() => {
         setMessage("");
         navigate("/");
-      }, 2000); // Mengarahkan ke homepage setelah 2 detik
+      }, 2000);
     } catch (error) {
       console.error("Error:", error);
       setMessage("Gagal diposting!");
@@ -85,13 +100,13 @@ const AddPostPage = () => {
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
-    setImageUrl(""); // Clear imageUrl if image file is chosen
+    setImageUrl(""); // Bersihkan imageUrl jika file gambar dipilih
     setPreviewUrl(URL.createObjectURL(e.target.files[0]));
   };
 
   const handleImageUrlChange = (e) => {
     setImageUrl(e.target.value);
-    setImage(null); // Clear image file if imageUrl is provided
+    setImage(null); // Bersihkan file gambar jika imageUrl disediakan
     setPreviewUrl(e.target.value);
   };
 

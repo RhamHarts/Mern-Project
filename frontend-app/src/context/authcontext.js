@@ -23,7 +23,11 @@ export const AuthProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       });
-      setUser(response.data.user); // Pastikan menggunakan 'profile' sesuai dengan respons dari server
+      if (response.data.user) {
+        setUser(response.data.user); // Memastikan bahwa objek user diterima
+      } else {
+        console.error("User data not found in response:", response.data);
+      }
     } catch (error) {
       console.error("Profile fetch failed:", error);
       setUser(null);
@@ -37,7 +41,11 @@ export const AuthProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       });
-      setUser(response.data.profile); // Pastikan menggunakan 'profile' sesuai dengan respons dari server
+      if (response.data.profile) {
+        setUser(response.data.profile); // Memastikan bahwa objek profile diterima
+      } else {
+        console.error("Profile data not found in response:", response.data);
+      }
     } catch (error) {
       console.error("Profile fetch failed:", error);
       setUser(null);
@@ -46,7 +54,6 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, password) => {
     try {
-      const response = await axios.post("http://localhost:3001/register", { username, password });
       const loginResponse = await axios.post("http://localhost:3001/login", { username, password });
       const { token, user } = loginResponse.data;
       localStorage.setItem("token", token);
@@ -95,8 +102,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchUserPosts = async () => {
+    try {
+      if (!token) throw new Error("No token found");
+      const response = await axios.get("http://localhost:3001/profile/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data.posts; // Pastikan response memiliki data.posts
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, updateProfile, fetchUserProfile, fetchUserProfileNow, }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateProfile, fetchUserProfile, fetchUserProfileNow, fetchUserPosts }}>
       {children}
     </AuthContext.Provider>
   );

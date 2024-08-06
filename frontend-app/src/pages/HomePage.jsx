@@ -1,17 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { AuthContext } from "../context/authcontext";
 import PostList from "../components/PostList";
 
 const HomePage = () => {
   const { user } = useContext(AuthContext);
-
-  useEffect(() => {
-    if (user) {
-      console.log("User ID:", user._id); // Log user ID menggunakan _id jika user tersedia
-    } else {
-      console.log("No user logged in"); // Log jika user belum login
-    }
-  }, [user]);
 
   return (
     <div className="bg-white min-h-screen flex flex-col justify-between">
@@ -22,7 +14,6 @@ const HomePage = () => {
           {user ? (
             <div>
               <p>Welcome, {user.username}!</p>
-              <p>User ID: {user._id}</p> {/* Tampilkan user ID di UI */}
             </div>
           ) : (
             "Welcome to MyBlog"
