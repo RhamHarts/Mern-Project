@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import AddPostPage from './pages/AddPostPage'; // Impor halaman baru
 import PostDetail from './pages/PostDetail';
 import ProfilePage from "./pages/ProfilePage";
+import EditPostPage from './pages/EditPostPage';
 import { AuthProvider } from './context/authcontext';
 
 
@@ -24,6 +25,7 @@ function App() {
           <Route exact path="/AddPostPage" element={<AddPostPage />} /> {/* Tambahkan route untuk AddPostPage */}
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/post/edit/:postId" element={<EditPostPage />} />
         </Routes>
       </div>
     </Router>

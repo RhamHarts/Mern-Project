@@ -1,4 +1,4 @@
-// src/services/UserService.js
+// src/services/ProfileService.js
 
 const PROFILE_URL = 'http://localhost:3001/profile';
 

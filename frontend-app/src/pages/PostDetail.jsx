@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPostById } from "../services/PostServices";
+import { Link } from "react-router-dom";
 
 const PostDetail = () => {
   const { postId } = useParams();
@@ -56,6 +57,13 @@ const PostDetail = () => {
           </span>
         ))}
       </div>
+
+      <Link
+        to={`/post/edit/${post._id}`}
+        className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition duration-300 ease-in-out"
+      >
+        Edit Post
+      </Link>
     </div>
   );
 };
