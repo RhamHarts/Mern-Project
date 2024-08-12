@@ -43,7 +43,7 @@ const EditPostPage = () => {
         setTitle(data.title);
         setDescription(data.description);
         setExcerpt(data.excerpt);
-        setTags(data.tags);
+        setTags(data.tags || []); // Ensure tags is set to an empty array if undefined
         setAuthor(data.author);
         setImageUrl(data.imageUrl || "");
         setPreviewUrl(data.imageUrl || "");
@@ -74,11 +74,16 @@ const EditPostPage = () => {
       return;
     }
 
+    if (tags.length === 0) {
+      setMessage("At least one tag is required.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("excerpt", excerpt);
-    formData.append("tags", tags.join(","));
+    formData.append("tags", tags.join(",")); // Convert tags array to comma-separated string
     formData.append("author", author);
     formData.append("userId", user.id);
 
