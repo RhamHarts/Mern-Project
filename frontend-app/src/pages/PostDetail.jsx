@@ -2,10 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPostById } from "../services/PostServices";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const PostDetail = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
+
+  const navigate = useNavigate();
+
+  const handleTagClick = (tag) => {
+    navigate(`/search?query=${encodeURIComponent(tag)}`);
+  };
+
+  const handleAuthorClick = (author) => {
+    navigate(`/search?query=${encodeURIComponent(author)}`);
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -39,7 +50,12 @@ const PostDetail = () => {
         alt={post.title}
       />
       <div className="mb-6">
-        <p className="text-lg font-semibold text-gray-900">{post.author}</p>
+        <span
+          onClick={() => handleAuthorClick(post.author)}
+          className="text-blue-500 cursor-pointer"
+        >
+          {post.author}
+        </span>
         <h4 className="text-gray-900">
           {new Date(post.date).toLocaleDateString()}
         </h4>
@@ -51,7 +67,8 @@ const PostDetail = () => {
         {post.tags.map((tag, index) => (
           <span
             key={index}
-            className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+            onClick={() => handleTagClick(tag)}
+            className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
           >
             #{tag}
           </span>

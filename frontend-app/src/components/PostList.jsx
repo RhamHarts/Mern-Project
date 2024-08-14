@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom"; // Import Link from React Router
+import { Link, useNavigate } from "react-router-dom";
 
 const PostList = () => {
   const [posts, setPosts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -26,6 +27,14 @@ const PostList = () => {
     return words.slice(0, numWords).join(" ") + "...";
   };
 
+  const handleTagClick = (tag) => {
+    navigate(`/search?query=${encodeURIComponent(tag)}`);
+  };
+
+  const handleAuthorClick = (author) => {
+    navigate(`/search?query=${encodeURIComponent(author)}`);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -35,11 +44,11 @@ const PostList = () => {
               <img
                 className="w-full h-80 object-cover"
                 src={
-                  post.image // Check for image first
+                  post.image
                     ? `http://localhost:3001/uploads/post/${post.image}`
-                    : post.imageUrl // If no image, check for imageUrl
+                    : post.imageUrl
                     ? post.imageUrl
-                    : "path/to/default/image.jpg" // Provide a default image in case both are missing
+                    : "path/to/default/image.jpg"
                 }
                 alt={post.title}
               />
@@ -51,7 +60,15 @@ const PostList = () => {
               </div>
               <div className="px-6 pt-4 pb-2 flex justify-between items-center">
                 <div className="flex">
-                  <h4 className="mr-2 font-bold">{post.author}</h4>
+                  <h4
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAuthorClick(post.author);
+                    }}
+                    className="mr-2 font-bold text-blue-500 cursor-pointer"
+                  >
+                    {post.author}
+                  </h4>
                 </div>
                 <div>
                   <h4 className="text-gray-400">
@@ -63,7 +80,11 @@ const PostList = () => {
                 {post.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleTagClick(tag);
+                    }}
+                    className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
                   >
                     #{tag}
                   </span>
