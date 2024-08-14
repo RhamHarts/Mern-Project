@@ -10,6 +10,7 @@ import PostDetail from './pages/PostDetail';
 import ProfilePage from "./pages/ProfilePage";
 import EditPostPage from './pages/EditPostPage';
 import { AuthProvider } from './context/authcontext';
+import SearchResultsPage from './pages/SearchResultPage'; // Import SearchResultsPage
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
           <Route path="/post/edit/:postId" element={<EditPostPage />} />
+          <Route path="/search" element={<SearchResultsPage />} /> {/* Add SearchResultsPage route */}
         </Routes>
       </div>
     </Router>

@@ -1,11 +1,17 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/authcontext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Reset searchTerm when location changes (i.e., when user navigates or refreshes)
+    setSearchTerm("");
+  }, [location]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -13,7 +19,9 @@ const Navbar = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    console.log("Search Term:", searchTerm);
+    if (searchTerm.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
+    }
   };
 
   const handlePostClick = () => {
@@ -33,7 +41,7 @@ const Navbar = () => {
         <form onSubmit={handleSearchSubmit} className="w-full max-w-md">
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Search Title, Author, Description, Tags"
             value={searchTerm}
             onChange={handleSearchChange}
             className="w-full px-5 py-2 rounded-md focus:outline-none focus:ring focus:ring-opacity-50"

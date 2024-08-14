@@ -102,8 +102,31 @@ const updatePost = async (req, res) => {
   }
 };
 
+const searchPost = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ message: 'Query parameter "q" is required' });
+    }
+
+    // Lakukan pencarian pada title, author, description, dan tags
+    const posts = await Post.find({
+      $or: [
+        { title: { $regex: q, $options: 'i' } },
+        { author: { $regex: q, $options: 'i' } },
+        { description: { $regex: q, $options: 'i' } },
+        { tags: { $regex: q, $options: 'i' } }
+      ]
+    }).sort({ title: 1 }); // Mengurutkan berdasarkan title secara ascending
+
+    res.json({ posts });
+  } catch (error) {
+    console.error('Error searching posts:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 
 
-
-module.exports = { getPosts, getPostById, createPost, updatePost };
+module.exports = { getPosts, getPostById, createPost, updatePost,searchPost };
