@@ -19,7 +19,10 @@ const Navbar = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
+    if (!user) {
+      // Redirect to login page if user is not logged in
+      navigate("/LoginPage");
+    } else if (searchTerm.trim()) {
       navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
