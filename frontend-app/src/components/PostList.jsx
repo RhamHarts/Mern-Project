@@ -9,7 +9,7 @@ const PostList = () => {
   const [visiblePosts, setVisiblePosts] = useState([]); // Postingan yang ditampilkan di UI
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useContext(AuthContext);
-  const [limit, setLimit] = useState(3); // Jumlah postingan yang ditampilkan
+  const [limit, setLimit] = useState(6); // Jumlah postingan yang ditampilkan
   const [totalPosts, setTotalPosts] = useState(0);
   const navigate = useNavigate();
 
@@ -40,7 +40,7 @@ const PostList = () => {
   }, [fetchPosts]);
 
   const handleSeeMoreClick = () => {
-    setLimit((prevLimit) => prevLimit + 3); // Naikkan limit untuk memuat lebih banyak postingan
+    setLimit((prevLimit) => prevLimit + 6); // Naikkan limit untuk memuat lebih banyak postingan
   };
 
   const truncateText = (text, numWords) => {

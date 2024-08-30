@@ -3,7 +3,7 @@ const Post = require('../models/Post');
 const getPosts = async (req, res) => {
   try {
     // Ambil batas jumlah post dari query params
-    const limit = parseInt(req.query.limit) || 3;
+    const limit = parseInt(req.query.limit) || 6;
 
     // Cari postingan dengan limit dan sort berdasarkan tanggal terbaru (createdAt)
     const posts = await Post.find()
