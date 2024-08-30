@@ -2,12 +2,25 @@ const Post = require('../models/Post');
 
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find();
-    res.json(posts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    // Ambil batas jumlah post dari query params
+    const limit = parseInt(req.query.limit) || 3;
+
+    // Cari postingan dengan limit dan sort berdasarkan tanggal terbaru (createdAt)
+    const posts = await Post.find()
+      .sort({ createdAt: -1 }) // Urutkan berdasarkan tanggal terbaru
+      .limit(limit);
+
+    // Hitung total jumlah post untuk pagination (masih bisa digunakan untuk keperluan lain)
+    const totalPosts = await Post.countDocuments();
+
+    // Kirimkan data post beserta total jumlah post
+    res.status(200).json({ posts, totalPosts });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const getPostById = async (req, res) => {
   try {

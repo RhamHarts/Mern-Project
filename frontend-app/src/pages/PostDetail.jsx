@@ -14,10 +14,6 @@ const PostDetail = () => {
     navigate(`/search?query=${encodeURIComponent(tag)}`);
   };
 
-  const handleAuthorClick = (author) => {
-    navigate(`/search?query=${encodeURIComponent(author)}`);
-  };
-
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -50,12 +46,7 @@ const PostDetail = () => {
         alt={post.title}
       />
       <div className="mb-6">
-        <span
-          onClick={() => handleAuthorClick(post.author)}
-          className="text-blue-500 cursor-pointer"
-        >
-          {post.author}
-        </span>
+        <p className="text-lg font-semibold text-gray-900">{post.author}</p>
         <h4 className="text-gray-900">
           {new Date(post.date).toLocaleDateString()}
         </h4>

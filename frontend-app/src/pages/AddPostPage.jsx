@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authcontext";
+import Footer from "../components/Footer";
 
 const AddPostPage = () => {
   const { user } = useContext(AuthContext);
