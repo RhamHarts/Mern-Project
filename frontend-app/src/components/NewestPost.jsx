@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/authcontext";
 import axios from "axios";
 import LoginModal from "./LoginModal"; // Import LoginModal
 
-const NewestPost = ({ user }) => {
+const NewestPost = () => {
   const [newestPost, setNewestPost] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Fetch post terbaru
@@ -23,7 +25,6 @@ const NewestPost = ({ user }) => {
   }, []);
 
   const handlePostClick = () => {
-    console.log("User:", user); // Tambahkan log ini
     if (!user) {
       // Jika user belum login, buka modal
       setIsModalOpen(true);
@@ -70,7 +71,9 @@ const NewestPost = ({ user }) => {
           src={
             newestPost.image
               ? `http://localhost:3001/uploads/post/${newestPost.image}`
-              : "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80"
+              : newestPost.imageUrl
+              ? newestPost.imageUrl
+              : "path/to/default/image.jpg"
           }
           alt={newestPost.title || "Newest Post Image"}
           onClick={handlePostClick}
@@ -89,9 +92,18 @@ const NewestPost = ({ user }) => {
             </h4>
             <span className="text-sm">{formatDate(newestPost.date)}</span>
           </div>
-          <h1 className="text-3xl font-bold mb-2">{newestPost.title}</h1>
-          <p className="text-lg mb-2">{newestPost.excerpt}</p>
-          <div className="px-6 pt-4 pb-2">
+          {/* Tambahkan onClick pada judul */}
+          <h1
+            className="text-3xl font-bold mb-2 cursor-pointer"
+            onClick={handlePostClick}
+          >
+            {newestPost.title}
+          </h1>
+          {/* Tambahkan onClick pada excerpt */}
+          <p className="text-lg mb-2 cursor-pointer" onClick={handlePostClick}>
+            {newestPost.excerpt}
+          </p>
+          <div className="px-1 pt-4 pb-2">
             {newestPost.tags.map((tag, index) => (
               <span
                 key={index} // Pastikan key pada tag unik di dalam map
@@ -101,7 +113,7 @@ const NewestPost = ({ user }) => {
                 }}
                 className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
               >
-                #{tag}
+                {tag}
               </span>
             ))}
           </div>

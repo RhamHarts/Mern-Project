@@ -7,7 +7,7 @@ const getPosts = async (req, res) => {
 
     // Cari postingan dengan limit dan sort berdasarkan tanggal terbaru (createdAt)
     const posts = await Post.find()
-      .sort({ createdAt: -1 }) // Urutkan berdasarkan tanggal terbaru
+      .sort({ date: -1 }) // Urutkan berdasarkan tanggal terbaru
       .limit(limit);
 
     // Hitung total jumlah post untuk pagination (masih bisa digunakan untuk keperluan lain)
