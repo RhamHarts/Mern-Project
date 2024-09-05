@@ -13,11 +13,10 @@ const HomePage = () => {
         <section className="container px-6 py-16 mx-auto text-center">
           <div className="max-w-lg mx-auto">
             <h1 className="text-3xl font-semibold text-gray-800 dark:text-white lg:text-4xl">
-              Building Your Next App with our Awesome components
+              Create Your Own Story
             </h1>
             <p className="mt-6 text-gray-500 dark:text-gray-300">
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Libero
-              similique obcaecati illum mollitia.
+              The latest industry news, technologies, and resources.
             </p>
           </div>
           <NewestPost />

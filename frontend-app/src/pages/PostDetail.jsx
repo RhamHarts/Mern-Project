@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPostById } from "../services/PostServices";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const PostDetail = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
-
   const navigate = useNavigate();
 
   const handleTagClick = (tag) => {
     navigate(`/search?query=${encodeURIComponent(tag)}`);
+  };
+
+  const handleAuthorClick = () => {
+    alert("Author diklik: " + post.author);
   };
 
   useEffect(() => {
@@ -31,29 +33,46 @@ const PostDetail = () => {
     return <div>Loading...</div>;
   }
 
+  // Memecah deskripsi berdasarkan baris baru menjadi array paragraf
+  const descriptionParagraphs = post.description.split("\n");
+
   return (
     <div className="container mx-auto px-96">
-      <h1 className="text-3xl font-bold mb-4 mt-10">{post.title}</h1>
+      <h1 className="text-4xl font-bold mb-4 mt-10">{post.title}</h1>
       <img
         className="w-full mb-4 mt-10"
         src={
-          post.image // Check for image first
+          post.image
             ? `http://localhost:3001/uploads/post/${post.image}`
-            : post.imageUrl // If no image, check for imageUrl
+            : post.imageUrl
             ? post.imageUrl
-            : "path/to/default/image.jpg" // Provide a default image in case both are missing
+            : "path/to/default/image.jpg"
         }
         alt={post.title}
       />
-      <div className="mb-6">
-        <p className="text-lg font-semibold text-gray-900">{post.author}</p>
+
+      {/* Bagian author dan tanggal di bawah gambar dan bersebelahan */}
+      <div className="flex justify-start items-center mb-6">
+        <p
+          className="text-lg font-semibold text-gray-900 mr-4 cursor-pointer"
+          onClick={handleAuthorClick}
+        >
+          {post.author}
+        </p>
         <h4 className="text-gray-900">
           {new Date(post.date).toLocaleDateString()}
         </h4>
       </div>
+
+      {/* Render deskripsi sebagai paragraf dengan rata kiri */}
       <div className="text-gray-700 text-base leading-relaxed mb-4">
-        {post.description}
+        {descriptionParagraphs.map((paragraph, index) => (
+          <p key={index} className="mb-4 text-left">
+            {paragraph}
+          </p>
+        ))}
       </div>
+
       <div className="flex flex-wrap mb-4">
         {post.tags.map((tag, index) => (
           <span
