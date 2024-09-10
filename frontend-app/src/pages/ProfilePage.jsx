@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
   const [formData, setFormData] = useState({
-    author: "",
     dateBirth: "",
     email: "",
     imageProfile: "", // Simpan URL gambar profil di sini
@@ -29,7 +28,6 @@ const ProfilePage = () => {
         setProfileData(profile);
         setFormData((prevFormData) => ({
           ...prevFormData,
-          author: profile.author,
           dateBirth: dateBirth,
           email: profile.email,
           imageProfile: isEditMode ? null : profile.imageProfile || "", // Set null only in edit mode
@@ -89,7 +87,6 @@ const ProfilePage = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const updatedFormData = new FormData();
-    updatedFormData.append("author", formData.author);
     updatedFormData.append("dateBirth", formData.dateBirth);
     updatedFormData.append("email", formData.email);
     if (formData.imageProfile) {
@@ -118,7 +115,6 @@ const ProfilePage = () => {
       console.log("Updated profile data:", updatedProfile); // Log data to console
       // Update the form data with the response data
       setFormData({
-        author: updatedProfile.author,
         dateBirth: dateBirth,
         email: updatedProfile.email,
         imageProfile: updatedProfile.imageProfile || "", // Update URL gambar profil
@@ -178,25 +174,6 @@ const ProfilePage = () => {
               )}
             </div>
           )}
-          <div className="flex flex-col mb-4">
-            <label
-              htmlFor="author"
-              className="mb-1 text-gray-600 font-semibold"
-            >
-              Author
-            </label>
-            <input
-              type="text"
-              id="author"
-              name="author"
-              value={formData.author}
-              onChange={handleInputChange}
-              disabled={!isEditMode} // Disable input in read mode
-              className={`border border-gray-300 rounded-lg px-3 py-2 ${
-                !isEditMode ? "bg-gray-200" : ""
-              }`}
-            />
-          </div>
           <div className="flex flex-col mb-4">
             <label
               htmlFor="dateBirth"
@@ -273,28 +250,13 @@ const ProfilePage = () => {
                 <div className="px-6 py-4">
                   <div className="font-bold text-xl mb-2">{post.title}</div>
                   <p className="text-gray-700 text-base">
-                    {truncateText(post.excerpt, 20)}
+                    {truncateText(post.content, 20)}
                   </p>
                 </div>
-                <div className="px-6 pt-4 pb-2 flex justify-between items-center">
-                  <div className="flex">
-                    <h4 className="mr-2 font-bold">{post.author}</h4>
-                  </div>
-                  <div>
-                    <h4 className="text-gray-400">
-                      {new Date(post.date).toLocaleDateString()}
-                    </h4>
-                  </div>
-                </div>
-                <div className="px-6 pt-4 pb-2">
-                  {post.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+                <div className="px-6 py-4">
+                  <span className="text-gray-600 text-sm">
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </Link>

@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPostById } from "../services/PostServices";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/authcontext";
 
 const PostDetail = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleTagClick = (tag) => {
     navigate(`/search?query=${encodeURIComponent(tag)}`);
   };
 
-  const handleAuthorClick = () => {
-    alert("Author diklik: " + post.author);
+  const handleauthorClick = () => {
+    alert("author diklik: " + post.author);
   };
 
   useEffect(() => {
@@ -55,7 +57,7 @@ const PostDetail = () => {
       <div className="flex justify-start items-center mb-6">
         <p
           className="text-lg font-semibold text-gray-900 mr-4 cursor-pointer"
-          onClick={handleAuthorClick}
+          onClick={handleauthorClick}
         >
           {post.author}
         </p>

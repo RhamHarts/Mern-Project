@@ -5,7 +5,7 @@ const Post = require('../models/Post');
 // Definisi fungsi createOrUpdateProfile
 exports.createOrUpdateProfile = async (req, res) => {
   try {
-    const { author, email, dateBirth } = req.body;
+    const { email, dateBirth } = req.body; // Menghapus author
     const userId = req.user.id;
 
     // Check if a file is uploaded
@@ -20,7 +20,6 @@ exports.createOrUpdateProfile = async (req, res) => {
 
     if (profile) {
       // Update existing profile
-      profile.author = author || profile.author;
       profile.email = email || profile.email;
       profile.dateBirth = dateBirth || profile.dateBirth;
       profile.imageProfile = imageProfile;
@@ -31,7 +30,6 @@ exports.createOrUpdateProfile = async (req, res) => {
       // Create new profile
       profile = new Profile({
         user: userId,
-        author,
         email,
         dateBirth,
         imageProfile
@@ -56,8 +54,6 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
-
-
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user.id; // Mengambil userId dari data autentikasi
@@ -77,9 +73,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-
-
-
 exports.getAllProfiles = async (req, res) => {
   try {
     // Ambil semua profil dari koleksi Profile
@@ -97,20 +90,26 @@ exports.getProfileWithPosts = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Fetch user profile
-    const user = await User.findById(userId).select('-password'); // Exclude password from response
+    // Fetch user profile along with username
+    const user = await User.findById(userId).select('-password'); // Exclude password
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Fetch posts by user
+    // Fetch posts by user, include username instead of author
     const posts = await Post.find({ userId: userId });
 
-    res.status(200).json({ success: true, user, posts });
+    res.status(200).json({ 
+      success: true, 
+      user: { 
+        username: user.username,  // Return username from User model
+        email: user.email
+      }, 
+      posts 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
-

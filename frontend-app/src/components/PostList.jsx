@@ -58,7 +58,7 @@ const PostList = () => {
     }
   };
 
-  const handleAuthorClick = (author) => {
+  const handleauthorClick = (author) => {
     if (!user) {
       setIsModalOpen(true);
     } else {
@@ -115,7 +115,7 @@ const PostList = () => {
                 <h4
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleAuthorClick(post.author);
+                    handleauthorClick(post.author);
                   }}
                   className="mr-2 font-bold text-blue-500 cursor-pointer"
                 >

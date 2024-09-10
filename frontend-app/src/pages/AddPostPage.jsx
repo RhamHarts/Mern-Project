@@ -10,7 +10,6 @@ const AddPostPage = () => {
   const [tags, setTags] = useState([]);
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
-  const [author, setAuthor] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [message, setMessage] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
@@ -19,9 +18,11 @@ const AddPostPage = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("User ID:", user._id); // Log user ID menggunakan _id jika user tersedia
+      console.log("User Object:", user); // Log seluruh objek user untuk memeriksa strukturnya
+      console.log("User ID:", user._id || user.id); // Pastikan properti ID benar
+      console.log("Author:", user.author || user.username); // Pastikan nama author benar
     } else {
-      console.log("No user logged in"); // Log jika user belum login
+      console.log("No user logged in");
     }
   }, [user]);
 
@@ -49,13 +50,19 @@ const AddPostPage = () => {
     formData.append("description", description);
     formData.append("excerpt", excerpt);
     formData.append("tags", tags.join(","));
-    formData.append("author", author);
-    formData.append("userId", user.id); // Menambahkan userId
+    formData.append("userId", user._id); // Menggunakan _id jika properti ID adalah _id
+    formData.append("author", user.username); // Menggunakan username jika itu adalah nama penulis
 
     if (image) {
       formData.append("image", image);
     } else if (imageUrl) {
       formData.append("imageUrl", imageUrl);
+    }
+
+    // Console.log untuk debug
+    console.log("Form Data sebelum dikirim:");
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
     }
 
     try {
@@ -83,7 +90,6 @@ const AddPostPage = () => {
       setImage(null);
       setImageUrl("");
       setPreviewUrl("");
-      setAuthor("");
       setTagInput("");
       setMessage("Berhasil diposting!");
 
@@ -241,17 +247,6 @@ const AddPostPage = () => {
                 </span>
               ))}
             </div>
-          </div>
-          <div className="mb-4">
-            <input
-              type="text"
-              id="author"
-              placeholder="Author Name"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-transparent rounded-md"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              required
-            />
           </div>
           <div>
             <button

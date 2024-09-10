@@ -1,8 +1,8 @@
-// middleware/auth.js
 const jwt = require('jsonwebtoken');
+const User = require('../models/User'); // Import model User
 
 const authMiddleware = {
-  verifyToken: (req, res, next) => {
+  verifyToken: async (req, res, next) => {
     const authHeader = req.header('Authorization');
     console.log('Auth Header:', authHeader);
 
@@ -20,7 +20,14 @@ const authMiddleware = {
     try {
       const verified = jwt.verify(token, process.env.JWT_SECRET);
       console.log('Verified:', verified);
-      req.user = verified;
+
+      // Mencari user di database
+      const user = await User.findById(verified.id).select('username email'); // Mengambil username
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      req.user = user; // Mengisi req.user dengan user yang ditemukan
       next();
     } catch (error) {
       console.error('Token verification error:', error);

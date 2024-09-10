@@ -29,7 +29,7 @@ const SearchResultsPage = () => {
 
   return (
     <div className="search-results-page">
-      <h1 className="text-2xl font-bold mb-4">Search Results</h1>
+      <h1 className="text-2xl font-bold mb-4">Search Results for: "{query}"</h1>
       {loading ? <p>Loading...</p> : <SearchPostList posts={posts} />}
     </div>
   );

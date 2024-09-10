@@ -11,7 +11,6 @@ const EditPostPage = () => {
   const [tags, setTags] = useState([]);
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
-  const [author, setAuthor] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [message, setMessage] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
@@ -44,7 +43,6 @@ const EditPostPage = () => {
         setDescription(data.description);
         setExcerpt(data.excerpt);
         setTags(data.tags || []); // Ensure tags is set to an empty array if undefined
-        setAuthor(data.author);
         setImageUrl(data.imageUrl || "");
         setPreviewUrl(data.imageUrl || "");
         setUseImageUrl(!!data.imageUrl);
@@ -84,7 +82,6 @@ const EditPostPage = () => {
     formData.append("description", description);
     formData.append("excerpt", excerpt);
     formData.append("tags", tags.join(",")); // Convert tags array to comma-separated string
-    formData.append("author", author);
     formData.append("userId", user.id);
 
     if (image) {
@@ -274,19 +271,6 @@ const EditPostPage = () => {
             </div>
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="author" className="block text-gray-700 mb-2">
-              Author
-            </label>
-            <input
-              type="text"
-              id="author"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-transparent rounded-md"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              required
-            />
-          </div>
           {message && <p className="text-red-500 mb-4">{message}</p>}
           <button
             type="submit"

@@ -36,8 +36,14 @@ const getPostById = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { title, description, excerpt, author, tags, date, imageUrl } = req.body;
+
+    const { title, description, excerpt, tags, date, imageUrl } = req.body;
     const userId = req.user.id; // Mengambil userId dari req.user
+    const username = req.user.username; // Mengambil username dari req.user
+
+    if (!username) {
+      return res.status(400).json({ message: 'Username is required' });
+    }
 
     let imageFile = null;
     if (imageUrl && imageUrl.startsWith('http')) {
@@ -50,7 +56,7 @@ const createPost = async (req, res) => {
       title,
       description,
       excerpt,
-      author,
+      author: username, // Pastikan ini terisi dengan username dari req.user
       tags: tags.split(',').map((tag) => tag.trim()),
       date,
       image: imageFile,
@@ -64,10 +70,12 @@ const createPost = async (req, res) => {
     res.status(500).json({ message: 'Error creating post', error });
   }
 };
+
+
 const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, excerpt, tags, author, date, imageUrl } = req.body;
+    const { title, description, excerpt, tags, date, imageUrl } = req.body;
     const userId = req.user.id;
 
     // Temukan postingan berdasarkan ID
@@ -90,7 +98,6 @@ const updatePost = async (req, res) => {
     if (description !== undefined) post.description = description;
     if (excerpt !== undefined) post.excerpt = excerpt;
     if (tags !== undefined) post.tags = tags.split(',').map((tag) => tag.trim());
-    if (author !== undefined) post.author = author;
     if (date !== undefined) post.date = date;
 
     // Periksa dan atur nilai image dan imageUrl
