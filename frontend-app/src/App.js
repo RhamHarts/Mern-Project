@@ -8,7 +8,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage'; 
 import AddPostPage from './pages/AddPostPage'; // Impor halaman baru
 import PostDetail from './pages/PostDetail';
-import ProfilePage from "./pages/ProfilePage";
+import MyProfilePage from "./pages/MyProfilePage";
 import EditPostPage from './pages/EditPostPage';
 import { AuthProvider } from './context/authcontext';
 import SearchResultsPage from './pages/SearchResultPage'; // Import SearchResultsPage
@@ -16,12 +16,14 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
-
-
+import { PostsProvider } from "./context/postcontext";
+import PostList from './components/PostList';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
     <AuthProvider>
+       <PostsProvider>
     <Router>
       <div className="App">
         <Navbar />
@@ -31,17 +33,20 @@ function App() {
           <Route exact path="/RegisterPage" element={<RegisterPage />} />
           <Route exact path="/AddPostPage" element={<AddPostPage />} /> {/* Tambahkan route untuk AddPostPage */}
           <Route path="/post/:postId" element={<PostDetail />} />
-          <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/MyProfilePage" element={<MyProfilePage />} />
           <Route path="/post/edit/:postId" element={<EditPostPage />} />
           <Route path="/search" element={<SearchResultsPage />} /> {/* Add SearchResultsPage route */}
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
           <Route path="/Terms" element={<Terms />} />
           <Route path="/Privacy" element={<Privacy />} />
+          <Route path="/" element={<PostList />} />
+          <Route path="/profile/:author" element={<ProfilePage />} />
         </Routes>
         <Footer />
       </div>
     </Router>
+    </PostsProvider>
     </AuthProvider>
   );
 }

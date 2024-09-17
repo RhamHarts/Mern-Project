@@ -46,7 +46,7 @@ const NewestPost = () => {
     if (!user) {
       setIsModalOpen(true);
     } else {
-      navigate(`/search?query=${encodeURIComponent(author)}`);
+      navigate(`/profile/${encodeURIComponent(author)}`); // Navigasi ke halaman profil author
     }
   };
 

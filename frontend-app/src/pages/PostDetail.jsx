@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPostById } from "../services/PostServices";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/authcontext";
 
 const PostDetail = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
-  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleTagClick = (tag) => {

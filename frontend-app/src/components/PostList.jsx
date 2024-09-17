@@ -1,47 +1,14 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
-import axios from "axios";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PostsContext } from "../context/postcontext";
 import { AuthContext } from "../context/authcontext";
 import LoginModal from "../components/LoginModal";
 
 const PostList = () => {
-  const [posts, setPosts] = useState([]); // Data mentah dari server
-  const [visiblePosts, setVisiblePosts] = useState([]); // Postingan yang ditampilkan di UI
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { visiblePosts, totalPosts, loadMorePosts } = useContext(PostsContext);
   const { user } = useContext(AuthContext);
-  const [limit, setLimit] = useState(6); // Jumlah postingan yang ditampilkan
-  const [totalPosts, setTotalPosts] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-
-  const fetchPosts = useCallback(async () => {
-    console.log("Fetching posts...");
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/posts?limit=${limit}`
-      );
-      console.log("Fetched posts:", response.data.posts);
-
-      setPosts((prevPosts) => {
-        // Filter postingan baru untuk menghindari duplikasi berdasarkan _id
-        const newPosts = response.data.posts.filter(
-          (post) => !prevPosts.some((prevPost) => prevPost._id === post._id)
-        );
-        return [...prevPosts, ...newPosts];
-      });
-
-      setTotalPosts(response.data.totalPosts);
-    } catch (error) {
-      console.error("Error fetching the posts:", error);
-    }
-  }, [limit]);
-
-  useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
-
-  const handleSeeMoreClick = () => {
-    setLimit((prevLimit) => prevLimit + 6); // Naikkan limit untuk memuat lebih banyak postingan
-  };
 
   const truncateText = (text, numWords) => {
     if (!text) return "";
@@ -58,11 +25,11 @@ const PostList = () => {
     }
   };
 
-  const handleauthorClick = (author) => {
+  const handleAuthorClick = (author) => {
     if (!user) {
       setIsModalOpen(true);
     } else {
-      navigate(`/search?query=${encodeURIComponent(author)}`);
+      navigate(`/profile/${encodeURIComponent(author)}`); // Navigasi ke halaman profil author
     }
   };
 
@@ -77,12 +44,6 @@ const PostList = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-
-  useEffect(() => {
-    if (posts.length > 0) {
-      setVisiblePosts(posts.slice(0, limit));
-    }
-  }, [posts, limit]);
 
   return (
     <div className="container mx-auto p-4">
@@ -115,7 +76,7 @@ const PostList = () => {
                 <h4
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleauthorClick(post.author);
+                    handleAuthorClick(post.author);
                   }}
                   className="mr-2 font-bold text-blue-500 cursor-pointer"
                 >
@@ -131,7 +92,7 @@ const PostList = () => {
             <div className="px-6 pt-4 pb-2">
               {post.tags.map((tag, index) => (
                 <span
-                  key={index} // Pastikan key pada tag unik di dalam map
+                  key={index}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleTagClick(tag);
@@ -150,7 +111,7 @@ const PostList = () => {
       {visiblePosts.length < totalPosts && (
         <div className="flex justify-center mt-6">
           <button
-            onClick={handleSeeMoreClick}
+            onClick={loadMorePosts}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg"
           >
             See More

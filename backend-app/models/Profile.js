@@ -4,27 +4,21 @@ const mongoose = require('mongoose');
 const ProfileSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  author: {
-    type: String,
-    required: true
-  },
-  imageProfile: {
-    type: String
-  },
-  imageProfile2: {
-    type: String
+    ref: 'User',
+    required: true,
   },
   email: {
     type: String,
-    required: true,
-    unique: true
   },
   dateBirth: {
     type: Date,
-    required: true
-  }
+  },
+  imageProfile: {
+    type: String,
+  },
+  aboutMe: {
+    type: String, // Deskripsi personal user
+  },
 });
 
 module.exports = mongoose.model('Profile', ProfileSchema);

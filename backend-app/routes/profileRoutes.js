@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createOrUpdateProfile, getProfile, getProfileWithPosts,getAllProfiles,getUserProfile } = require('../controllers/profileController');
+const { createOrUpdateProfile, getProfile, getMyProfileWithPosts,getAllProfiles,getUserProfile,getProfileWithPostsByAuthor } = require('../controllers/profileController');
 const { verifyToken } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
@@ -33,9 +33,14 @@ router.get('/all', verifyToken, getAllProfiles);
 router.get('/now', verifyToken, getProfile);
 
 // Route untuk mengambil profil pengguna beserta postingannya
-router.get('/posts', verifyToken, getProfileWithPosts);
+router.get('/posts', verifyToken, getMyProfileWithPosts);
+
+router.put('/update', verifyToken, upload.single('imageProfile'), createOrUpdateProfile);
 
 // Route untuk membuat atau mengupdate profil pengguna
-router.post('/now', verifyToken, upload.single('imageProfile'), createOrUpdateProfile);
+router.post('/create', verifyToken, upload.single('imageProfile'), createOrUpdateProfile);
+
+// Route untuk mengambil profil dan postingan berdasarkan author
+router.get('/posts/:author', verifyToken, getProfileWithPostsByAuthor);
 
 module.exports = router;
