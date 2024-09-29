@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/authcontext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
@@ -8,11 +8,29 @@ const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const dropdownRef = useRef(null); // Ref untuk dropdown
 
   useEffect(() => {
     // Reset searchTerm when location changes (i.e., when user navigates or refreshes)
     setSearchTerm("");
   }, [location]);
+
+  useEffect(() => {
+    // Fungsi untuk menutup dropdown saat klik di luar dropdown
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false); // Tutup dropdown
+      }
+    };
+
+    // Tambahkan event listener pada klik di seluruh dokumen
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Hapus event listener saat komponen dibersihkan
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -89,7 +107,6 @@ const Navbar = () => {
             </form>
           </div>
 
-          {/* Sign in, Login, dan Profil di Sebelah Kanan */}
           {/* Post Button, Sign in, Login, dan Profil di Sebelah Kanan */}
           <div className="flex items-center space-x-4">
             {user && (
@@ -130,7 +147,7 @@ const Navbar = () => {
                 </Link>
               </>
             ) : (
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={toggleDropdown}
                   className="flex items-center space-x-2 focus:outline-none"

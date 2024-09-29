@@ -1,138 +1,82 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/authcontext";
 import { useNavigate } from "react-router-dom";
+import { FaCamera, FaCheck, FaTimes } from "react-icons/fa";
+import EditProfile from "../components/EditProfileModal";
+import ImageInputProfile from "../components/ImageInputProfile";
 
 const MyProfilePage = () => {
   const [formData, setFormData] = useState({
-    dateBirth: "",
-    email: "",
-    imageProfile: "", // Simpan URL gambar profil di sini
-    aboutMe: "", // Added "aboutMe" field
+    imageProfile: "", // Store profile image URL here
   });
 
   const [profileData, setProfileData] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [posts, setPosts] = useState([]);
   const { user } = useContext(AuthContext);
-  // eslint-disable-next-line no-unused-vars
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [isImageChanged, setIsImageChanged] = useState(false);
+  const editorRef = useRef(null); // Reference for AvatarEditor
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const storedToken = localStorage.getItem("token");
+
+      if (!storedToken) {
+        console.error("No token found. Please log in.");
+        return;
+      }
+
       try {
-        const response = await axios.get("http://localhost:3001/profile/now");
-        const profile = response.data.profile;
+        const response = await axios.get("http://localhost:3001/profile/now", {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
 
-        // Convert the date to yyyy-MM-dd format
-        const dateBirth = new Date(profile.dateBirth)
-          .toISOString()
-          .split("T")[0];
+        if (response.data && response.data.profile) {
+          const profile = response.data.profile;
 
-        setProfileData(profile);
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          dateBirth: dateBirth,
-          email: profile.email,
-          imageProfile: isEditMode ? null : profile.imageProfile || "", // Set null only in edit mode
-          aboutMe: profile.aboutMe || "", // Set "aboutMe" from profile
-        }));
-        console.log(profile);
+          // Log all profile data received from the server
+          console.log("Fetched profile data:", profile); // Tambahkan log ini
 
-        // Fetch user's posts
-        fetchUserPosts(profile._id);
+          setProfileData(profile);
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            username: profile.username,
+            email: profile.email,
+            imageProfile: profile.imageProfile, // Ambil dari database
+            aboutMe: profile.aboutMe || "",
+          }));
+
+          setIsImageChanged(false);
+
+          fetchUserPosts(profile._id);
+        } else {
+          console.error(
+            "Profile data not found in the response:",
+            response.data
+          );
+        }
       } catch (error) {
-        console.error("Error fetching the profile:", error);
+        console.error(
+          "Error fetching the profile:",
+          error.response ? error.response.data : error.message
+        );
       }
     };
 
     fetchProfile();
-  }, [isEditMode]);
+  }, []);
 
   const fetchUserPosts = async (userId) => {
     try {
       const response = await axios.get(`http://localhost:3001/profile/posts`);
-      setPosts(response.data.posts); // Update the posts state
+      setPosts(response.data.posts);
     } catch (error) {
       console.error("Error fetching user posts:", error);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      imageProfile: file,
-    }));
-
-    // Preview the selected image
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    if (file) {
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
-    }
-  };
-
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    const updatedFormData = new FormData();
-    updatedFormData.append("dateBirth", formData.dateBirth);
-    updatedFormData.append("email", formData.email);
-    updatedFormData.append("aboutMe", formData.aboutMe); // Append "aboutMe" to form data
-    if (formData.imageProfile) {
-      updatedFormData.append("imageProfile", formData.imageProfile);
-    }
-
-    try {
-      const response = await axios.put(
-        "http://localhost:3001/profile/update",
-        updatedFormData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      alert("Profile updated successfully");
-      const updatedProfile = response.data.profile;
-
-      // Convert the date to yyyy-MM-dd format
-      const dateBirth = new Date(updatedProfile.dateBirth)
-        .toISOString()
-        .split("T")[0];
-
-      setProfileData(updatedProfile);
-      console.log("Updated profile data:", updatedProfile); // Log data to console
-      // Update the form data with the response data
-      setFormData({
-        dateBirth: dateBirth,
-        email: updatedProfile.email,
-        imageProfile: updatedProfile.imageProfile || "", // Update URL gambar profil
-        aboutMe: updatedProfile.aboutMe || "", // Update "aboutMe"
-      });
-
-      // Exit edit mode after successful update
-      setIsEditMode(false);
-    } catch (error) {
-      alert("Failed to update profile");
     }
   };
 
@@ -160,118 +104,109 @@ const MyProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      {/* Profile Section */}
-      <div className="w-full max-w-md p-8 bg-gray-200 rounded-lg shadow-lg mb-8 mt-10">
-        <form onSubmit={handleFormSubmit} className="flex flex-col">
-          {profileData && (
+    <div className="min-h-screen flex">
+      <div className="w-1/3 p-4 bg-gray-100">
+        {/* Profile Content */}
+        <div className="w-full flex flex-col items-center justify-start">
+          <div className="w-52 relative">
             <div className="flex flex-col items-center mb-4">
-              {isEditMode ? (
-                <>
-                  <input
-                    type="file"
-                    id="imageProfile"
-                    name="imageProfile"
-                    accept=".png, .jpg, .jpeg"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="imageProfile"
-                    className="flex items-center cursor-pointer"
-                  >
-                    <img
-                      src={
-                        imagePreview ||
-                        `http://localhost:3001/uploads/profile/${formData.imageProfile}`
-                      }
-                      alt="Profile"
-                      className="w-full h-32 mb-4 cursor-pointer"
-                    />
-                  </label>
-                </>
-              ) : (
+              <ImageInputProfile />
+              <label
+                htmlFor="imageProfile"
+                className="flex items-center cursor-pointer"
+              >
                 <img
                   src={`http://localhost:3001/uploads/profile/${formData.imageProfile}`}
                   alt="Profile"
-                  className="w-full h-32 mb-4"
+                  className="w-52 h-52 mb-4 object-cover rounded-full cursor-pointer"
                 />
-              )}
+              </label>
             </div>
-          )}
-          <div className="flex flex-col mb-4">
-            <label
-              htmlFor="dateBirth"
-              className="mb-1 text-gray-600 font-semibold"
-            >
-              Birth Date
-            </label>
-            <input
-              type="date"
-              id="dateBirth"
-              name="dateBirth"
-              value={formData.dateBirth}
-              onChange={handleInputChange}
-              disabled={!isEditMode} // Disable input in read mode
-              className={`border border-gray-300 rounded-lg px-3 py-2 ${
-                !isEditMode ? "bg-gray-200" : ""
-              }`}
-            />
+
+            <div className="w-full text-center mb-4">
+              <h4 className="text-black font-semibold text-xl">
+                {formData.username}
+              </h4>
+              <h2 className="text-gray-400 text-base"> {formData.email}</h2>
+            </div>
+
+            <div className="w-full text-center mb-4">
+              <div className="ml-5">
+                <EditProfile onClose={() => setIsModalOpen(false)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4 justify-center items-center mt-4">
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold">10,001</h3>
+                  <span className="text-xs">Followers</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold">0</h3>
+                  <span className="text-xs">Following</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold">{posts.length}</h3>
+                  <span className="text-xs">Posts</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold">500</h3>
+                  <span className="text-xs">Likes</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-2 text-center mb-4">
+              <p className="text-sm text-gray-500 leading-5 text-justify">
+                {formData.aboutMe}
+              </p>
+            </div>
+
+            <div className="mt-5 text-center">
+              <h3 className="text-base mb-4">Social Media:</h3>
+              <div className="flex flex-col space-y-4 items-start">
+                <div className="flex items-center">
+                  <img
+                    className="w-8 h-7"
+                    alt="Facebook"
+                    src="/icons/facebook.svg"
+                  />
+                  <a className="ml-3" href="https://www.facebook.com/">
+                    Facebook
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <img
+                    className="w-8 h-7"
+                    alt="Instagram"
+                    src="/icons/instagram.svg"
+                  />
+                  <a className="ml-3" href="https://www.instagram.com/">
+                    Instagram
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <img
+                    className="w-8 h-7"
+                    alt="Tiktok"
+                    src="/icons/tiktok.svg"
+                  />
+                  <a className="ml-3" href="https://www.tiktok.com/">
+                    Tiktok
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <img
+                    className="w-8 h-7"
+                    alt="Twitter"
+                    src="/icons/twitter.svg"
+                  />
+                  <a className="ml-3" href="https://www.twitter.com/">
+                    Twitter
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col mb-4">
-            <label htmlFor="email" className="mb-1 text-gray-600 font-semibold">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              disabled={!isEditMode} // Disable input in read mode
-              className={`border border-gray-300 rounded-lg px-3 py-2 ${
-                !isEditMode ? "bg-gray-200" : ""
-              }`}
-            />
-          </div>
-          <div className="flex flex-col mb-4">
-            <label
-              htmlFor="aboutMe"
-              className="mb-1 text-gray-600 font-semibold"
-            >
-              About Me
-            </label>
-            <textarea
-              id="aboutMe"
-              name="aboutMe"
-              value={formData.aboutMe}
-              onChange={handleInputChange}
-              disabled={!isEditMode} // Disable input in read mode
-              rows="4"
-              className={`border border-gray-300 rounded-lg px-3 py-2 ${
-                !isEditMode ? "bg-gray-200" : ""
-              }`}
-              placeholder="Tell something about yourself..."
-            />
-          </div>
-          {isEditMode && (
-            <button
-              type="submit"
-              className="bg-blue-500 text-white w-full py-2 rounded-lg hover:bg-blue-600 transition duration-200 mb-4"
-            >
-              Update Profile
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={toggleEditMode}
-            className={`${
-              isEditMode ? "bg-gray-500" : "bg-blue-500"
-            } text-white w-full py-2 rounded-lg hover:bg-blue-600 transition duration-200`}
-          >
-            {isEditMode ? "Cancel" : "Edit Profile"}
-          </button>
-        </form>
+        </div>
       </div>
 
       {/* Posts Section */}

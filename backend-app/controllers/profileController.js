@@ -5,67 +5,88 @@ const Post = require('../models/Post');
 // Definisi fungsi createOrUpdateProfile
 exports.createOrUpdateProfile = async (req, res) => {
   try {
-    const { email, dateBirth, aboutMe } = req.body; // Ambil data dari body
+    const { username, email, bio, facebook, instagram, twitter, tiktok } = req.body;
     const userId = req.user.id;
 
-    // Check if file is uploaded, but make it optional
-    let imageProfile;
-    if (req.file) {
-      imageProfile = req.file.filename; // Jika ada file, simpan filenya
-      console.log('Image uploaded: ', imageProfile);
+    // Validasi data jika diperlukan
+    if (!username || !email) {
+      return res.status(400).json({ success: false, message: 'Username and email are required' });
     }
 
-    // Check if profile already exists for the user
     let profile = await Profile.findOne({ user: userId });
 
-    if (profile) {
-      // Update existing profile
-      console.log('Existing profile found for user:', userId);
-      
-      // Update only if data is provided, otherwise keep existing values
-      if (email) {
-        console.log('Updating email to:', email);
-        profile.email = email;
-      }
-      if (dateBirth) {
-        console.log('Updating date of birth to:', dateBirth);
-        profile.dateBirth = dateBirth;
-      }
-      if (aboutMe) {
-        console.log('Updating aboutMe to:', aboutMe);
-        profile.aboutMe = aboutMe;
-      }
+    // Ambil nama file asli jika file diunggah, jika tidak pakai gambar profil sebelumnya
+    const imageProfile = req.file ? req.file.originalname : profile ? profile.imageProfile : '';
 
-      // Only update imageProfile if a new file is uploaded
-      if (imageProfile) {
-        console.log('Updating imageProfile to:', imageProfile);
-        profile.imageProfile = imageProfile;
-      }
+    if (profile) {
+      // Jika profil sudah ada, lakukan update
+      profile.username = username || profile.username;
+      profile.email = email || profile.email;
+      profile.bio = bio || profile.bio;
+      profile.facebook = facebook || profile.facebook;
+      profile.instagram = instagram || profile.instagram;
+      profile.twitter = twitter || profile.twitter;
+      profile.tiktok = tiktok || profile.tiktok;
+      profile.imageProfile = imageProfile;
 
       await profile.save();
-      console.log('Profile updated:', profile);
       return res.status(200).json({ success: true, profile });
     } else {
-      // Create new profile with only the provided data
-      console.log('Creating new profile for user:', userId);
-
+      // Jika belum ada profil, buat baru
       profile = new Profile({
         user: userId,
-        email: email || '', // Default to empty string if not provided
-        dateBirth: dateBirth || '', // Default to empty string if not provided
-        aboutMe: aboutMe || '', // Default to empty string if not provided
-        imageProfile: imageProfile || '', // Default to empty string if not provided
+        username,
+        email,
+        bio,
+        facebook,
+        instagram,
+        twitter,
+        tiktok,
+        imageProfile,
       });
 
       await profile.save();
-      console.log('Profile created:', profile);
       return res.status(201).json({ success: true, profile });
     }
   } catch (error) {
     console.error('Error in createOrUpdateProfile:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+exports.updateImageProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Mengambil ID pengguna dari autentikasi
+
+    // Cari profil berdasarkan userId
+    let profile = await Profile.findOne({ user: userId });
+
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Profile not found' });
+    }
+
+    // Validasi apakah ada file yang diunggah
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image file uploaded' });
+    }
+
+    // Ambil nama file asli dari file yang diunggah
+    const imageProfile = req.file.originalname;
+
+    // Perbarui imageProfile dalam profil pengguna
+    profile.imageProfile = imageProfile;
+
+    // Simpan perubahan profil
+    await profile.save();
+
+    return res.status(200).json({ success: true, message: 'Profile image updated successfully', profile });
+  } catch (error) {
+    console.error('Error updating profile image:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
 
 
 exports.getUserProfile = async (req, res) => {
@@ -115,33 +136,31 @@ exports.getMyProfileWithPosts = async (req, res) => {
     const userId = req.user.id;
 
     const user = await User.findById(userId).select('-password');
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
     const profile = await Profile.findOne({ user: userId });
-
-    if (!profile) {
-      return res.status(404).json({ success: false, message: 'Profile not found' });
-    }
-
     const posts = await Post.find({ userId: userId });
 
-    res.status(200).json({ 
-      success: true, 
-      user: { 
-        username: user.username,  
+
+    res.status(200).json({
+      success: true,
+      user: {
+        username: user.username,
         email: user.email,
-        aboutMe: profile.aboutMe, // Sertakan aboutMe di response
-      }, 
-      posts 
+        bio: profile.bio,
+        facebook: profile.facebook,
+        instagram: profile.instagram,
+        twitter: profile.twitter,
+        tiktok: profile.tiktok,
+        imageProfile: profile.imageProfile
+      },
+      posts
     });
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
 
 exports.getProfileWithPostsByAuthor = async (req, res) => {
   try {
@@ -170,8 +189,13 @@ exports.getProfileWithPostsByAuthor = async (req, res) => {
       user: {
         username: user.username,
         email: user.email,
-        aboutMe: profile.aboutMe,
+        bio: profile.bio,
         imageProfile: profile.imageProfile, // Sertakan imageProfile di respons
+        facebook: profile.facebook, // Sertakan Bio di response
+        instagram: profile.instagram, // Sertakan Bio di response
+        twitter: profile.twitter, // Sertakan Bio di response
+        tiktok: profile.tiktok, // Sertakan Bio di response
+        image: profile.imageProfile
       },
       posts
     });
