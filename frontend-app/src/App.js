@@ -42,6 +42,7 @@ function App() {
           <Route path="/Privacy" element={<Privacy />} />
           <Route path="/" element={<PostList />} />
           <Route path="/profile/:author" element={<ProfilePage />} />
+
         </Routes>
         <Footer />
       </div>

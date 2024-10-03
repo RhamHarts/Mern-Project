@@ -64,7 +64,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-gray-100">
+    <nav className="bg-gray-100 h-20">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo dan Search Bar di Sebelah Kiri */}
@@ -112,12 +112,12 @@ const Navbar = () => {
             {user && (
               <button
                 onClick={handlePostClick}
-                className="flex items-center space-x-2 text-blue-700 font-bold hover:text-white hover:bg-blue-700 px-4 py-2 rounded"
+                className="flex items-center space-x-2 text-blue-700 font-bold hover:text-white hover:bg-blue-700 px-2 py-6 rounded"
               >
-                <span>Post</span>
+                <span className=" text-2xl">Post</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className="h-7 w-7"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -154,7 +154,7 @@ const Navbar = () => {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-blue-700"
+                    className=" w-10 text-blue-700 mt-1"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -168,7 +168,7 @@ const Navbar = () => {
                   </svg>
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
                     <Link
                       to="/MyProfilePage"
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

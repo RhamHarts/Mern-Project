@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authcontext";
+import { Editor } from "@tinymce/tinymce-react";
 
 const AddPostPage = () => {
   const { user } = useContext(AuthContext);
@@ -14,17 +15,8 @@ const AddPostPage = () => {
   const [message, setMessage] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
   const [useImageUrl, setUseImageUrl] = useState(false); // State baru untuk memilih input gambar atau URL
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user) {
-      console.log("User Object:", user); // Log seluruh objek user untuk memeriksa strukturnya
-      console.log("User ID:", user._id || user.id); // Pastikan properti ID benar
-      console.log("Author:", user.author || user.username); // Pastikan nama author benar
-    } else {
-      console.log("No user logged in");
-    }
-  }, [user]);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,7 +134,7 @@ const AddPostPage = () => {
     <div className="flex items-center justify-center bg-gray-100 mt-10">
       <div className="w-4/5 bg-gray-100 flex flex-col items-center justify-center">
         <form onSubmit={handleSubmit} className="w-full">
-          <div className="mb-4">
+          <div className="mb-4 ">
             <textarea
               rows="1"
               placeholder="Enter Title"
@@ -154,15 +146,60 @@ const AddPostPage = () => {
             ></textarea>
           </div>
           <div className="mb-4">
-            <textarea
-              rows="5"
-              id="description"
-              placeholder="Enter Description"
+            <Editor
+              apiKey="9j7zq09rqgctd6t77u673k8jwu23ikix068j3aoaj3u2x49s"
+              initialValue=""
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              className="h-56 text-2xl resize-none w-full bg-none focus:outline-none focus:border-transparent"
-            ></textarea>
+              init={{
+                menubar: false,
+                plugins:
+                  "preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons",
+
+                toolbar:
+                  "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl",
+                image_title: true,
+                automatic_uploads: true,
+                file_picker_types: "image",
+                file_picker_callback: (cb, value, meta) => {
+                  const input = document.createElement("input");
+                  input.setAttribute("type", "file");
+                  input.setAttribute("accept", "image/*");
+
+                  input.onchange = async function () {
+                    const file = this.files[0];
+                    const formData = new FormData();
+                    formData.append("image", file); // Make sure to match the key 'image'
+
+                    // Upload image to the server
+                    try {
+                      const response = await fetch(
+                        "http://localhost:3001/posts/upload-image",
+                        {
+                          method: "POST",
+                          body: formData,
+                        }
+                      );
+
+                      if (!response.ok) {
+                        throw new Error("Upload failed");
+                      }
+
+                      const data = await response.json();
+
+                      // Provide the image URL to TinyMCE
+                      cb(data.location, { title: file.name });
+                    } catch (error) {
+                      console.error("Error uploading image:", error);
+                    }
+                  };
+
+                  input.click();
+                },
+
+                placeholder: "Write Your Post...",
+              }}
+              onEditorChange={(newContent) => setDescription(newContent)}
+            />
           </div>
           <div className="mb-4">
             <label htmlFor="excerpt" className="block text-gray-700 mb-2">

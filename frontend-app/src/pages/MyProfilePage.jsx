@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/authcontext";
 import { useNavigate } from "react-router-dom";
-import { FaCamera, FaCheck, FaTimes } from "react-icons/fa";
+import { FaCamera } from "react-icons/fa";
 import EditProfile from "../components/EditProfileModal";
 import ImageInputProfile from "../components/ImageInputProfile";
 
@@ -11,14 +11,15 @@ const MyProfilePage = () => {
     imageProfile: "", // Store profile image URL here
   });
 
+  // eslint-disable-next-line no-unused-vars
   const [profileData, setProfileData] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [posts, setPosts] = useState([]);
   const { user } = useContext(AuthContext);
+  // eslint-disable-next-line no-unused-vars
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
   const [isImageChanged, setIsImageChanged] = useState(false);
-  const editorRef = useRef(null); // Reference for AvatarEditor
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -49,6 +50,10 @@ const MyProfilePage = () => {
             email: profile.email,
             imageProfile: profile.imageProfile, // Ambil dari database
             aboutMe: profile.aboutMe || "",
+            facebook: profile.facebook,
+            instagram: profile.instagram,
+            tiktok: profile.tiktok, // Ambil dari database
+            twitter: profile.twitter || "",
           }));
 
           setIsImageChanged(false);
@@ -108,18 +113,21 @@ const MyProfilePage = () => {
       <div className="w-1/3 p-4 bg-gray-100">
         {/* Profile Content */}
         <div className="w-full flex flex-col items-center justify-start">
-          <div className="w-52 relative">
+          <div className="w-52 relative group">
             <div className="flex flex-col items-center mb-4">
               <ImageInputProfile />
-              <label
-                htmlFor="imageProfile"
-                className="flex items-center cursor-pointer"
-              >
-                <img
-                  src={`http://localhost:3001/uploads/profile/${formData.imageProfile}`}
-                  alt="Profile"
-                  className="w-52 h-52 mb-4 object-cover rounded-full cursor-pointer"
-                />
+              <label htmlFor="imageProfile" className="flex items-center">
+                {/* Wrapper for image with hover effect */}
+                <div className="relative w-52 h-52">
+                  <img
+                    src={`http://localhost:3001/uploads/profile/${formData.imageProfile}`}
+                    className="w-52 h-52 mb-4 object-cover rounded-full transition duration-300 ease-in-out group-hover:filter group-hover:blur-sm group-hover:brightness-50  "
+                  />
+                  {/* Camera icon shown on hover */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out group-hover:cursor-pointer">
+                    <FaCamera className="text-white text-4xl" />
+                  </div>
+                </div>
               </label>
             </div>
 
@@ -163,46 +171,97 @@ const MyProfilePage = () => {
             <div className="mt-5 text-center">
               <h3 className="text-base mb-4">Social Media:</h3>
               <div className="flex flex-col space-y-4 items-start">
-                <div className="flex items-center">
-                  <img
-                    className="w-8 h-7"
-                    alt="Facebook"
-                    src="/icons/facebook.svg"
-                  />
-                  <a className="ml-3" href="https://www.facebook.com/">
-                    Facebook
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <img
-                    className="w-8 h-7"
-                    alt="Instagram"
-                    src="/icons/instagram.svg"
-                  />
-                  <a className="ml-3" href="https://www.instagram.com/">
-                    Instagram
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <img
-                    className="w-8 h-7"
-                    alt="Tiktok"
-                    src="/icons/tiktok.svg"
-                  />
-                  <a className="ml-3" href="https://www.tiktok.com/">
-                    Tiktok
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <img
-                    className="w-8 h-7"
-                    alt="Twitter"
-                    src="/icons/twitter.svg"
-                  />
-                  <a className="ml-3" href="https://www.twitter.com/">
-                    Twitter
-                  </a>
-                </div>
+                {formData.facebook && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Facebook"
+                      src="/icons/facebook.svg"
+                    />
+                    <a className="ml-3" href="https://www.facebook.com/">
+                      {formData.facebook}
+                    </a>
+                  </div>
+                )}
+                {!formData.facebook && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Facebook"
+                      src="/icons/facebook.svg"
+                    />
+                    <span className="ml-3">Facebook</span>
+                  </div>
+                )}
+
+                {formData.instagram && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Instagram"
+                      src="/icons/instagram.svg"
+                    />
+                    <a className="ml-3" href="https://www.instagram.com/">
+                      {formData.instagram}
+                    </a>
+                  </div>
+                )}
+                {!formData.instagram && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Instagram"
+                      src="/icons/instagram.svg"
+                    />
+                    <span className="ml-3">Instagram</span>
+                  </div>
+                )}
+
+                {formData.tiktok && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Tiktok"
+                      src="/icons/tiktok.svg"
+                    />
+                    <a className="ml-3" href="https://www.tiktok.com/">
+                      {formData.tiktok}
+                    </a>
+                  </div>
+                )}
+                {!formData.tiktok && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Tiktok"
+                      src="/icons/tiktok.svg"
+                    />
+                    <span className="ml-3">Tiktok</span>
+                  </div>
+                )}
+
+                {formData.twitter && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Twitter"
+                      src="/icons/twitter.svg"
+                    />
+                    <a className="ml-3" href="https://www.twitter.com/">
+                      {formData.twitter}
+                    </a>
+                  </div>
+                )}
+                {!formData.twitter && (
+                  <div className="flex items-center">
+                    <img
+                      className="w-8 h-7"
+                      alt="Twitter"
+                      src="/icons/twitter.svg"
+                    />
+                    <span className="ml-3">Twitter</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

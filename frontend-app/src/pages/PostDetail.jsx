@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPostById } from "../services/PostServices";
 import { Link, useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify"; // Import DOMPurify
 
 const PostDetail = () => {
   const { postId } = useParams();
@@ -13,7 +14,7 @@ const PostDetail = () => {
   };
 
   const handleauthorClick = () => {
-    alert("author diklik: " + post.author);
+    navigate(`/profile/${post.author}`);
   };
 
   useEffect(() => {
@@ -33,8 +34,8 @@ const PostDetail = () => {
     return <div>Loading...</div>;
   }
 
-  // Memecah deskripsi berdasarkan baris baru menjadi array paragraf
-  const descriptionParagraphs = post.description.split("\n");
+  // Membersihkan HTML menggunakan DOMPurify
+  const cleanDescription = DOMPurify.sanitize(post.description);
 
   return (
     <div className="container mx-auto px-96">
@@ -64,14 +65,11 @@ const PostDetail = () => {
         </h4>
       </div>
 
-      {/* Render deskripsi sebagai paragraf dengan rata kiri */}
-      <div className="text-gray-700 text-base leading-relaxed mb-4">
-        {descriptionParagraphs.map((paragraph, index) => (
-          <p key={index} className="mb-4 text-left">
-            {paragraph}
-          </p>
-        ))}
-      </div>
+      {/* Render deskripsi menggunakan dangerouslySetInnerHTML */}
+      <div
+        className="text-gray-700 text-base leading-relaxed mb-4 text-left"
+        dangerouslySetInnerHTML={{ __html: cleanDescription }}
+      />
 
       <div className="flex flex-wrap mb-4">
         {post.tags.map((tag, index) => (

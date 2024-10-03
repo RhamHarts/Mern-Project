@@ -7,8 +7,10 @@ const ImageInputProfile = ({ imageSrc, onCancel, onSave }) => {
   const fileInputRef = useRef(null); // Ref untuk input file
   const editorRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // State untuk modal
+  // eslint-disable-next-line no-unused-vars
   const [profileData, setProfileData] = useState(null);
   const [imagePreview, setImagePreview] = useState(imageSrc || null);
+  // eslint-disable-next-line no-unused-vars
   const [isImageChanged, setIsImageChanged] = useState(false);
   const [formData, setFormData] = useState({
     imageProfile: "",
