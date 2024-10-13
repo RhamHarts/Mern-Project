@@ -1,4 +1,5 @@
 const Post = require('../models/Post');
+const User = require('../models/User');
 
 const getPosts = async (req, res) => {
   try {
@@ -22,17 +23,32 @@ const getPosts = async (req, res) => {
 };
 
 
+
 const getPostById = async (req, res) => {
   try {
+    // Step 1: Find the post by ID
     const post = await Post.findById(req.params.id);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
-    res.json(post);
+
+    // Step 2: Check if the current user has liked the post
+    const userId = req.user.id; // Assuming req.user contains the authenticated user
+    const hasLiked = post.likes.includes(userId); // Check if userId is in the likes array
+
+    // Step 3: Add hasLiked information to the post object
+    const postWithLikeStatus = {
+      ...post.toObject(), // Convert mongoose document to a plain object
+      isLiked: hasLiked, // Add the isLiked field
+    };
+
+    // Step 4: Send the post with the like status to the client
+    res.json(postWithLikeStatus);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 const createPost = async (req, res) => {
   try {
@@ -147,6 +163,84 @@ const searchPost = async (req, res) => {
   }
 };
 
+const likePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const userId = req.user.id;
+    const authorId = post.userId;
+
+    const user = await User.findById(authorId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const hasLiked = post.likes.includes(userId);
+
+    if (hasLiked) {
+      post.likes = post.likes.filter(id => id !== userId);
+      post.likesCount = Math.max(post.likesCount - 1, 0);
+      user.totalLikes = Math.max(user.totalLikes - 1, 0); // Reduce total likes
+    } else {
+      post.likes.push(userId);
+      post.likesCount += 1;
+      user.totalLikes += 1; // Increase total likes
+    }
+
+    await post.save();
+    await user.save();
+
+    res.status(200).json({
+      message: hasLiked ? 'Post unliked' : 'Post liked',
+      likesCount: post.likesCount,
+      totalLikes: user.totalLikes // Return total likes for user
+    });
+  } catch (error) {
+    console.error('Error processing like/unlike:', error); // Tambahkan log error di sini
+    res.status(500).json({ message: 'Error processing request', error });
+  }
+};
 
 
-module.exports = { getPosts, getPostById, createPost, updatePost,searchPost };
+const bookmarkPost = async (req, res) => {
+  try {
+    // Step 1: Find the post by ID
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Step 2: Check if the user has already bookmarkd the post
+    const userId = req.user.id;  // Assuming req.user contains the authenticated user
+    const hasbookmarked = post.bookmarks.includes(userId);
+
+    if (hasbookmarked) {
+      // Step 3a: If already bookmarkd, unbookmark the post
+      post.bookmarks = post.bookmarks.filter(id => id !== userId);  // Remove userId from bookmarks array
+      post.bookmarksCount = Math.max(post.bookmarksCount - 1, 0);   // Decrease bookmarksCount, but not below 0
+    } else {
+      // Step 3b: If not bookmarkd yet, bookmark the post
+      post.bookmarks.push(userId);  // Add userId to bookmarks array
+      post.bookmarksCount += 1;     // Increase bookmarksCount
+    }
+
+    // Step 4: Save the updated post to the database
+    await post.save();
+
+    // Step 5: Send back the updated post and the bookmark/unbookmark message
+    res.status(200).json({ message: hasbookmarked ? 'Post unbookmarked' : 'Post bookmarked', post });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error processing request', error });
+  }
+};
+
+
+
+
+
+
+module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,bookmarkPost };

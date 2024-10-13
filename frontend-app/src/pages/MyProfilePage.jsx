@@ -11,15 +11,15 @@ const MyProfilePage = () => {
     imageProfile: "", // Store profile image URL here
   });
 
-  // eslint-disable-next-line no-unused-vars
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
   const { user } = useContext(AuthContext);
-  // eslint-disable-next-line no-unused-vars
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  // eslint-disable-next-line no-unused-vars
   const [isImageChanged, setIsImageChanged] = useState(false);
+  const [totalLikes, setTotalLikes] = useState(0);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -40,25 +40,24 @@ const MyProfilePage = () => {
         if (response.data && response.data.profile) {
           const profile = response.data.profile;
 
-          // Log all profile data received from the server
-          console.log("Fetched profile data:", profile); // Tambahkan log ini
-
           setProfileData(profile);
           setFormData((prevFormData) => ({
             ...prevFormData,
             username: profile.username,
             email: profile.email,
-            imageProfile: profile.imageProfile, // Ambil dari database
-            aboutMe: profile.aboutMe || "",
+            imageProfile: profile.imageProfile, // Set image from database
+            aboutMe: profile.aboutMe,
             facebook: profile.facebook,
             instagram: profile.instagram,
-            tiktok: profile.tiktok, // Ambil dari database
+            tiktok: profile.tiktok,
             twitter: profile.twitter || "",
           }));
 
           setIsImageChanged(false);
 
           fetchUserPosts(profile._id);
+          fetchCurrentUserFollowersAndFollowing(); // Fetch followers and following counts
+          fetchTotalLikes();
         } else {
           console.error(
             "Profile data not found in the response:",
@@ -76,12 +75,59 @@ const MyProfilePage = () => {
     fetchProfile();
   }, []);
 
-  const fetchUserPosts = async (userId) => {
+  // Fetch user's posts
+  const fetchUserPosts = async () => {
     try {
       const response = await axios.get(`http://localhost:3001/profile/posts`);
       setPosts(response.data.posts);
     } catch (error) {
       console.error("Error fetching user posts:", error);
+    }
+  };
+
+  // Fetch current user's followers and following count
+  const fetchCurrentUserFollowersAndFollowing = async () => {
+    const storedToken = localStorage.getItem("token");
+
+    if (!storedToken) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/followers-following`,
+        {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        }
+      );
+      setFollowersCount(response.data.followersCount);
+      setFollowingCount(response.data.followingCount);
+    } catch (error) {
+      console.error("Error fetching followers and following counts:", error);
+    }
+  };
+
+  // Fetch current user's followers and following count
+  const fetchTotalLikes = async () => {
+    const storedToken = localStorage.getItem("token");
+
+    if (!storedToken) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:3001/likes`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+      setTotalLikes(response.data.totalLikes);
+    } catch (error) {
+      console.error("Error fetching followers and following counts:", error);
     }
   };
 
@@ -121,10 +167,10 @@ const MyProfilePage = () => {
                 <div className="relative w-52 h-52">
                   <img
                     src={`http://localhost:3001/uploads/profile/${formData.imageProfile}`}
-                    className="w-52 h-52 mb-4 object-cover rounded-full transition duration-300 ease-in-out group-hover:filter group-hover:blur-sm group-hover:brightness-50  "
+                    className="w-52 h-52 mb-4 object-cover rounded-full transition duration-300 ease-in-out hover:blur-sm hover:brightness-50"
                   />
                   {/* Camera icon shown on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out group-hover:cursor-pointer">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition duration-300 ease-in-out cursor-pointer">
                     <FaCamera className="text-white text-4xl" />
                   </div>
                 </div>
@@ -138,17 +184,23 @@ const MyProfilePage = () => {
               <h2 className="text-gray-400 text-base"> {formData.email}</h2>
             </div>
 
+            <div className="p-2 text-center mb-4">
+              <p className="text-sm text-gray-500 leading-5 text-justify">
+                {formData.aboutMe}
+              </p>
+            </div>
+
             <div className="w-full text-center mb-4">
               <div className="ml-5">
                 <EditProfile onClose={() => setIsModalOpen(false)} />
               </div>
               <div className="grid grid-cols-2 gap-4 justify-center items-center mt-4">
                 <div className="flex flex-col items-center">
-                  <h3 className="text-lg font-semibold">10,001</h3>
+                  <h3 className="text-lg font-semibold">{followersCount}</h3>
                   <span className="text-xs">Followers</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <h3 className="text-lg font-semibold">0</h3>
+                  <h3 className="text-lg font-semibold">{followingCount}</h3>
                   <span className="text-xs">Following</span>
                 </div>
                 <div className="flex flex-col items-center">
@@ -156,7 +208,7 @@ const MyProfilePage = () => {
                   <span className="text-xs">Posts</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <h3 className="text-lg font-semibold">500</h3>
+                  <h3 className="text-lg font-semibold">{totalLikes}</h3>
                   <span className="text-xs">Likes</span>
                 </div>
               </div>

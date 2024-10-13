@@ -41,8 +41,7 @@ function App() {
           <Route path="/Terms" element={<Terms />} />
           <Route path="/Privacy" element={<Privacy />} />
           <Route path="/" element={<PostList />} />
-          <Route path="/profile/:author" element={<ProfilePage />} />
-
+          <Route path="/profile/:id" element={<ProfilePage />} />
         </Routes>
         <Footer />
       </div>

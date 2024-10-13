@@ -10,6 +10,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  totalLikes: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model('User', UserSchema);

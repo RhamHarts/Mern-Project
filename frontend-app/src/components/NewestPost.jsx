@@ -42,11 +42,11 @@ const NewestPost = () => {
     }
   };
 
-  const handleAuthorClick = (author) => {
+  const handleAuthorClick = () => {
     if (!user) {
       setIsModalOpen(true);
     } else {
-      navigate(`/profile/${encodeURIComponent(author)}`); // Navigasi ke halaman profil author
+      navigate(`/profile/${newestPost.userId}`); // Mengarahkan ke halaman profil berdasarkan userId
     }
   };
 
@@ -82,10 +82,7 @@ const NewestPost = () => {
         <div className="absolute bottom-0 left-0 w-full p-4 bg-black bg-opacity-50 text-white text-left">
           <div className="flex items-center mb-4">
             <h4
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAuthorClick(newestPost.author);
-              }}
+              onClick={handleAuthorClick} // Hapus argumen author
               className="mr-2 font-bold text-blue-500 cursor-pointer"
             >
               {newestPost.author}

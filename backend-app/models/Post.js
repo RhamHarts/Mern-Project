@@ -9,7 +9,11 @@ const postSchema = new mongoose.Schema({
   image: { type: String, trim: true }, // Path ke image jika disimpan di server
   imageUrl: { type: String, trim: true }, // URL ke image jika di-hosting di luar
   date: { type: Date, default: Date.now },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // Tetap gunakan userId untuk referensi user
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Tetap gunakan userId untuk referensi user
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
+  bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
+  likesCount: { type: Number, default: 0 }, // Tambahkan field ini
+  bookmarksCount: { type: Number, default: 0 }, // Tambahkan field ini
 });
 
 const Post = mongoose.model('Post', postSchema);

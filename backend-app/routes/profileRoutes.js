@@ -6,8 +6,8 @@ const {
     getMyProfileWithPosts, 
     getAllProfiles, 
     getUserProfile, 
-    getProfileWithPostsByAuthor,  
-    updateImageProfile
+    getProfileWithPostsById,  
+    updateImageProfile,
 } = require('../controllers/profileController');
 const  authMiddleware  = require('../middleware/auth');
 const multer = require('multer');
@@ -50,7 +50,9 @@ router.post('/create', authMiddleware.verifyToken,createOrUpdateProfile);
 
 router.post('/image', authMiddleware.verifyToken, upload.single('imageProfile'), updateImageProfile);
 
-// Route untuk mengambil profil dan postingan berdasarkan author
-router.get('/posts/:author', authMiddleware.verifyToken, getProfileWithPostsByAuthor);
+// Route untuk mengambil profil dan postingan berdasarkan id
+router.get('/posts/:id', authMiddleware.verifyToken, getProfileWithPostsById);
+
+
 
 module.exports = router;

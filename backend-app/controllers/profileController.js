@@ -5,7 +5,7 @@ const Post = require('../models/Post');
 // Definisi fungsi createOrUpdateProfile
 exports.createOrUpdateProfile = async (req, res) => {
   try {
-    const { username, email, bio, facebook, instagram, twitter, tiktok } = req.body;
+    const { username, email, aboutMe, facebook, instagram, twitter, tiktok } = req.body;
     const userId = req.user.id;
 
     // Validasi data jika diperlukan
@@ -22,7 +22,7 @@ exports.createOrUpdateProfile = async (req, res) => {
       // Jika profil sudah ada, lakukan update
       profile.username = username || profile.username;
       profile.email = email || profile.email;
-      profile.bio = bio || profile.bio;
+      profile.aboutMe = aboutMe || profile.aboutMe;
       profile.facebook = facebook || profile.facebook;
       profile.instagram = instagram || profile.instagram;
       profile.twitter = twitter || profile.twitter;
@@ -37,7 +37,7 @@ exports.createOrUpdateProfile = async (req, res) => {
         user: userId,
         username,
         email,
-        bio,
+        aboutMe,
         facebook,
         instagram,
         twitter,
@@ -144,8 +144,8 @@ exports.getMyProfileWithPosts = async (req, res) => {
       success: true,
       user: {
         username: user.username,
-        email: user.email,
-        bio: profile.bio,
+        email: profile.email,
+        aboutMe: profile.aboutMe,
         facebook: profile.facebook,
         instagram: profile.instagram,
         twitter: profile.twitter,
@@ -162,15 +162,15 @@ exports.getMyProfileWithPosts = async (req, res) => {
 };
 
 
-exports.getProfileWithPostsByAuthor = async (req, res) => {
+exports.getProfileWithPostsById = async (req, res) => {
   try {
-    const { author } = req.params; // Mengambil parameter author dari URL
+    const { id } = req.params; // Mengambil parameter id dari URL
 
-    // Cari user berdasarkan username (author)
-    const user = await User.findOne({ username: author }).select('-password');
+    // Cari user berdasarkan userId
+    const user = await User.findById(id).select('-password');
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'Author not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     // Cari profil berdasarkan userId dari user yang ditemukan
@@ -180,7 +180,7 @@ exports.getProfileWithPostsByAuthor = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Profile not found' });
     }
 
-    // Cari semua postingan yang dibuat oleh user (author)
+    // Cari semua postingan yang dibuat oleh user
     const posts = await Post.find({ userId: user._id });
 
     // Kirimkan respons dengan data profil dan postingan
@@ -188,19 +188,20 @@ exports.getProfileWithPostsByAuthor = async (req, res) => {
       success: true,
       user: {
         username: user.username,
-        email: user.email,
-        bio: profile.bio,
-        imageProfile: profile.imageProfile, // Sertakan imageProfile di respons
-        facebook: profile.facebook, // Sertakan Bio di response
-        instagram: profile.instagram, // Sertakan Bio di response
-        twitter: profile.twitter, // Sertakan Bio di response
-        tiktok: profile.tiktok, // Sertakan Bio di response
-        image: profile.imageProfile
+        email:profile.email,
+        aboutMe: profile.aboutMe,
+        imageProfile: profile.imageProfile,
+        facebook: profile.facebook,
+        instagram: profile.instagram,
+        twitter: profile.twitter,
+        tiktok: profile.tiktok
       },
       posts
     });
   } catch (error) {
-    console.error('Error fetching profile with posts by author:', error);
+    console.error('Error fetching profile with posts by ID:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+

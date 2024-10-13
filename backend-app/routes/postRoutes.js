@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { getPosts, createPost, getPostById, updatePost, searchPost } = require('../controllers/postController');
+const { getPosts, createPost, getPostById, updatePost, searchPost,likePost, bookmarkPost } = require('../controllers/postController');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -28,9 +28,13 @@ router.get('/', getPosts);
 router.post('/', authMiddleware.verifyToken, upload.single('image'), createPost);
 
 // Rute untuk mendapatkan postingan berdasarkan ID
-router.get('/:id', getPostById);
+router.get('/:id', authMiddleware.verifyToken, getPostById);
 
 // Rute untuk mengupdate postingan berdasarkan ID
 router.put('/:id', authMiddleware.verifyToken, upload.single('image'), updatePost);
+
+router.post('/:id/like', authMiddleware.verifyToken, likePost);
+
+router.post('/:id/bookmark', authMiddleware.verifyToken, bookmarkPost);
 
 module.exports = router;

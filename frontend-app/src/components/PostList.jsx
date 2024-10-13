@@ -25,11 +25,11 @@ const PostList = () => {
     }
   };
 
-  const handleAuthorClick = (author) => {
+  const handleAuthorClick = (userId) => {
     if (!user) {
       setIsModalOpen(true);
     } else {
-      navigate(`/profile/${encodeURIComponent(author)}`); // Navigasi ke halaman profil author
+      navigate(`/profile/${userId}`); // Navigate to the author's profile
     }
   };
 
@@ -50,7 +50,7 @@ const PostList = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {visiblePosts.map((post) => (
           <div
-            key={post._id} // Pastikan _id unik
+            key={post._id} // Ensure _id is unique
             onClick={() => handlePostClick(post)}
             className="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer"
           >
@@ -75,8 +75,8 @@ const PostList = () => {
               <div className="flex">
                 <h4
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleAuthorClick(post.author);
+                    e.stopPropagation(); // Prevent post click
+                    handleAuthorClick(post.userId); // Pastikan ini mengarah ke authorId
                   }}
                   className="mr-2 font-bold text-blue-500 cursor-pointer"
                 >
@@ -94,7 +94,7 @@ const PostList = () => {
                 <span
                   key={index}
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent post click
                     handleTagClick(tag);
                   }}
                   className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"

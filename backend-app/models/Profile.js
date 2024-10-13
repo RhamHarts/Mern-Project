@@ -18,7 +18,7 @@ const ProfileSchema = new mongoose.Schema({
     lowercase: true, 
     match: [/\S+@\S+\.\S+/, 'Please enter a valid email address'] 
   },
-  bio: { 
+  aboutMe: { 
     type: String, 
     default: '', 
     trim: true 

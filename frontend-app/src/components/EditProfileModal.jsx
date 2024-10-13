@@ -34,9 +34,6 @@ const EditProfile = ({ onClose }) => {
         if (response.data && response.data.profile) {
           const profile = response.data.profile;
 
-          // Log all profile data received from the server
-          console.log("Fetched profile data:", profile); // Tambahkan log ini
-
           setProfileData(profile);
           setFormData((prevFormData) => ({
             ...prevFormData,
