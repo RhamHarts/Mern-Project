@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchPostById, toggleLikePost } from "../services/PostServices"; // Import the toggleLikePost function
+import {
+  fetchPostById,
+  toggleLikePost,
+  toggleUnlikePost, // Import the unlikePost function
+  toggleBookmarkPost,
+} from "../services/PostServices"; // Import services
 import { Link, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify"; // Import DOMPurify
 import { FaHeart, FaBookmark, FaShare } from "react-icons/fa"; // Import icons
@@ -23,20 +28,43 @@ const PostDetail = () => {
     }
   };
 
-  // Toggle the like status for the post
+  // Toggle the like/unlike status for the post
   const handleLikeClick = async () => {
     try {
-      const response = await toggleLikePost(postId); // API call to toggle like
-      console.log("Updated Likes Count:", response.likesCount);
-      setLikes(response.likesCount);
-      setIsLiked(!isLiked); // Toggle the isLiked state
+      if (isLiked) {
+        // If already liked, unlike the post
+        const response = await toggleUnlikePost(postId); // Call API to unlike post
+        console.log(
+          "Unlike successful. Updated Likes Count:",
+          response.likesCount
+        );
+        setLikes(response.likesCount);
+        setIsLiked(false); // Update state to reflect that the post is now unliked
+      } else {
+        // If not liked, like the post
+        const response = await toggleLikePost(postId); // API call to toggle like
+        console.log(
+          "Like successful. Updated Likes Count:",
+          response.likesCount
+        );
+        setLikes(response.likesCount);
+        setIsLiked(true); // Update state to reflect that the post is now liked
+      }
     } catch (error) {
       console.error("Error toggling like:", error.message || error);
     }
   };
 
-  const handleBookmarkClick = () => {
-    setIsBookmarked(!isBookmarked); // Toggle bookmark state
+  // Toggle the bookmark status for the post
+  const handleBookmarkClick = async () => {
+    try {
+      const response = await toggleBookmarkPost(postId); // API call to toggle bookmark
+      console.log("Updated Bookmark Status:", response.isBookmarked);
+      setIsBookmarked(response.isBookmarked); // Update the bookmark status
+      setIsBookmarked(!isBookmarked); // Toggle the isBookmarked state
+    } catch (error) {
+      console.error("Error toggling bookmark:", error.message || error);
+    }
   };
 
   const handleShareClick = () => {
@@ -51,10 +79,12 @@ const PostDetail = () => {
         setPost(postData);
         setLikes(postData.likesCount || 0); // Set the likes count from the fetched data
         setIsLiked(postData.isLiked); // Update the initial like state
+        setIsBookmarked(postData.isBookmarked); // Update the initial bookmark state
 
-        // Console log for likesCount and isLiked
+        // Console log for likesCount, isLiked, and isBookmarked
         console.log("Likes Count:", postData.likesCount);
-        console.log("User has liked this post:", postData.isLiked); // Log untuk mengecek apakah user sudah like
+        console.log("User has liked this post:", postData.isLiked);
+        console.log("User has bookmarked this post:", postData.isBookmarked); // Log untuk bookmark
       } catch (error) {
         console.error("Error fetching post:", error);
       }

@@ -1,5 +1,8 @@
 const Post = require('../models/Post');
-const User = require('../models/User');
+const Like = require('../models/Like')
+const Bookmark = require('../models/Bookmark')
+const User = require('../models/User')
+
 
 const getPosts = async (req, res) => {
   try {
@@ -26,24 +29,22 @@ const getPosts = async (req, res) => {
 
 const getPostById = async (req, res) => {
   try {
-    // Step 1: Find the post by ID
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id).populate('likes').populate('bookmarks'); // Mengambil data likes dan bookmarks
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Step 2: Check if the current user has liked the post
-    const userId = req.user.id; // Assuming req.user contains the authenticated user
-    const hasLiked = post.likes.includes(userId); // Check if userId is in the likes array
+    const userId = req.user.id; 
+    const hasLiked = post.likes.some(like => like.userId.toString() === userId); // Mengecek apakah userId ada di likes
+    const hasBookmarked = post.bookmarks.some(bookmark => bookmark.userId.toString() === userId); // Mengecek apakah userId ada di bookmarks
 
-    // Step 3: Add hasLiked information to the post object
-    const postWithLikeStatus = {
-      ...post.toObject(), // Convert mongoose document to a plain object
-      isLiked: hasLiked, // Add the isLiked field
+    const postWithStatus = {
+      ...post.toObject(),
+      isLiked: hasLiked,
+      isBookmarked: hasBookmarked, // Tambahkan status bookmark
     };
 
-    // Step 4: Send the post with the like status to the client
-    res.json(postWithLikeStatus);
+    res.json(postWithStatus);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -163,78 +164,105 @@ const searchPost = async (req, res) => {
   }
 };
 
+
 const likePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    // Periksa apakah user sudah like post ini
+    const existingLike = await Like.findOne({ postId, userId });
+    if (existingLike) {
+      return res.status(400).json({ message: 'You already liked this post' });
+    }
+
+    // Buat like baru
+    const like = new Like({ postId, userId });
+    await like.save();
+
+    // Temukan post yang akan di-like
+    const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    const userId = req.user.id;
-    const authorId = post.userId;
+    // Tambahkan like ke post dan increment likesCount
+    await Post.findByIdAndUpdate(
+      postId,
+      { $push: { likes: like._id }, $inc: { likesCount: 1 } },
+      { new: true }
+    );
 
-    const user = await User.findById(authorId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    // Tambahkan 1 ke totalLikes milik user yang membuat post ini
+    await User.findByIdAndUpdate(post.userId, { $inc: { totalLikes: 1 } });
 
-    const hasLiked = post.likes.includes(userId);
-
-    if (hasLiked) {
-      post.likes = post.likes.filter(id => id !== userId);
-      post.likesCount = Math.max(post.likesCount - 1, 0);
-      user.totalLikes = Math.max(user.totalLikes - 1, 0); // Reduce total likes
-    } else {
-      post.likes.push(userId);
-      post.likesCount += 1;
-      user.totalLikes += 1; // Increase total likes
-    }
-
-    await post.save();
-    await user.save();
-
-    res.status(200).json({
-      message: hasLiked ? 'Post unliked' : 'Post liked',
-      likesCount: post.likesCount,
-      totalLikes: user.totalLikes // Return total likes for user
-    });
+    res.status(201).json({ message: 'Post liked successfully', like });
   } catch (error) {
-    console.error('Error processing like/unlike:', error); // Tambahkan log error di sini
-    res.status(500).json({ message: 'Error processing request', error });
+    res.status(500).json({ message: 'Server error', error });
   }
 };
 
 
 const bookmarkPost = async (req, res) => {
   try {
-    // Step 1: Find the post by ID
-    const post = await Post.findById(req.params.id);
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    // Periksa apakah user sudah bookmark post ini
+    const existingBookmark = await Bookmark.findOne({ postId, userId });
+    if (existingBookmark) {
+      return res.status(400).json({ message: 'You already bookmarked this post' });
+    }
+
+    // Buat bookmark baru
+    const bookmark = new Bookmark({ postId, userId });
+    await bookmark.save();
+
+    // Tambahkan bookmark ke array bookmarks di post dan increment bookmarksCount
+    await Post.findByIdAndUpdate(
+      postId,
+      { $push: { bookmarks: bookmark._id }, $inc: { bookmarksCount: 1 } }, // Increment bookmarksCount
+      { new: true }
+    );
+
+    res.status(201).json({ message: 'Post bookmarked successfully', bookmark });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const unlikePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    // Cek apakah user sudah menyukai postingan ini
+    const existingLike = await Like.findOne({ postId, userId });
+    if (!existingLike) {
+      return res.status(400).json({ message: 'You have not liked this post yet' });
+    }
+
+    // Hapus like dari database
+    await Like.findByIdAndDelete(existingLike._id);
+
+    // Kurangi jumlah like dari post dan totalLikes dari user
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { likes: existingLike._id }, $inc: { likesCount: -1 } }, // Kurangi likesCount
+      { new: true }
+    );
+
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Step 2: Check if the user has already bookmarkd the post
-    const userId = req.user.id;  // Assuming req.user contains the authenticated user
-    const hasbookmarked = post.bookmarks.includes(userId);
+    // Kurangi 1 dari totalLikes milik user yang memiliki post ini
+    await User.findByIdAndUpdate(post.userId, { $inc: { totalLikes: -1 } });
 
-    if (hasbookmarked) {
-      // Step 3a: If already bookmarkd, unbookmark the post
-      post.bookmarks = post.bookmarks.filter(id => id !== userId);  // Remove userId from bookmarks array
-      post.bookmarksCount = Math.max(post.bookmarksCount - 1, 0);   // Decrease bookmarksCount, but not below 0
-    } else {
-      // Step 3b: If not bookmarkd yet, bookmark the post
-      post.bookmarks.push(userId);  // Add userId to bookmarks array
-      post.bookmarksCount += 1;     // Increase bookmarksCount
-    }
-
-    // Step 4: Save the updated post to the database
-    await post.save();
-
-    // Step 5: Send back the updated post and the bookmark/unbookmark message
-    res.status(200).json({ message: hasbookmarked ? 'Post unbookmarked' : 'Post bookmarked', post });
-
+    res.status(200).json({ message: 'Like removed successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error processing request', error });
+    console.error('Error unliking post:', error);
+    res.status(500).json({ message: 'Server error', error });
   }
 };
 
@@ -242,5 +270,4 @@ const bookmarkPost = async (req, res) => {
 
 
 
-
-module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,bookmarkPost };
+module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,unlikePost,bookmarkPost };
