@@ -370,5 +370,31 @@ const deletePost = async (req, res) => {
   }
 };
 
+const getRelatedPosts = async (req, res) => {
+  try {
+    const { id } = req.params; // ID dari postingan yang sedang dilihat
+    const currentPost = await Post.findById(id);
 
-module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,unlikePost,bookmarkPost,unbookmarkPost,getLikePostsByUser,getBookmarkPostsByUser,deletePost };
+    if (!currentPost) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Cari postingan terkait berdasarkan tag, judul, dan penulis
+    const relatedPosts = await Post.find({
+      _id: { $ne: id }, // Tidak termasuk postingan yang sedang dilihat
+      $or: [
+        { tags: { $in: currentPost.tags } }, // Tag yang sama
+        { title: { $regex: currentPost.title, $options: 'i' } }, // Judul yang mirip
+        { author: currentPost.author } // Penulis yang sama
+      ]
+    }).limit(3); // Batasi jumlah postingan terkait yang diambil
+
+    res.status(200).json({ relatedPosts });
+  } catch (error) {
+    console.error('Error fetching related posts:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,unlikePost,bookmarkPost,unbookmarkPost,getLikePostsByUser,getBookmarkPostsByUser,deletePost,getRelatedPosts };

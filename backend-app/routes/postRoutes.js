@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { getPosts, createPost, getPostById, updatePost, searchPost,likePost, bookmarkPost,unlikePost,unbookmarkPost,getLikePostsByUser,getBookmarkPostsByUser,deletePost} = require('../controllers/postController');
+const { getPosts, createPost, getPostById, updatePost, searchPost,likePost, bookmarkPost,unlikePost,unbookmarkPost,getLikePostsByUser,getBookmarkPostsByUser,deletePost,getRelatedPosts} = require('../controllers/postController');
 const authMiddleware = require('../middleware/auth');
 
 
@@ -30,8 +30,6 @@ router.get('/', getPosts);
 router.post('/', authMiddleware.verifyToken, upload.single('image'), createPost);
 
 
-
-
 // Rute untuk mendapatkan postingan berdasarkan ID
 router.get('/:id', authMiddleware.verifyToken, getPostById);
 
@@ -39,6 +37,8 @@ router.get('/:id', authMiddleware.verifyToken, getPostById);
 router.put('/:id', authMiddleware.verifyToken, upload.single('image'), updatePost);
 
 router.delete('/:id', authMiddleware.verifyToken, deletePost);
+
+router.get('/:id/related',authMiddleware.verifyToken, getRelatedPosts);
 
 
 router.post('/:postId/like', authMiddleware.verifyToken, likePost);
@@ -64,6 +64,7 @@ router.post('/upload-image', upload.single('image'), (req, res) => {
   // Mengembalikan URL gambar yang telah di-upload
   res.json({ location: `http://localhost:3001/uploads/post/${req.file.filename}` });
 });
+
 
 
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -7,8 +8,9 @@ import {
   toggleBookmarkPost,
   toggleUnbookmarkPost,
 } from "../services/PostServices"; // Import services
-import { Link, useNavigate } from "react-router-dom";
-import DOMPurify from "dompurify"; // Import DOMPurify
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 import { FaHeart, FaBookmark, FaShare } from "react-icons/fa"; // Import icons
 import { marked } from "marked";
 
@@ -19,7 +21,31 @@ const PostDetail = () => {
   const [bookmark, setBookmark] = useState(0); // State for storing the likes count
   const [isLiked, setIsLiked] = useState(false); // State for checking if the post is liked
   const [isBookmarked, setIsBookmarked] = useState(false); // State for bookmark status
+  const [relatedPosts, setRelatedPosts] = useState([]); // State untuk menyimpan related posts
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const postData = await fetchPostById(postId);
+        setPost(postData);
+        setLikes(postData.likesCount || 0);
+        setIsLiked(postData.isLiked);
+        setBookmark(postData.bookmarksCount || 0);
+        setIsBookmarked(postData.isBookmarked);
+
+        // Fetch related posts
+        const relatedResponse = await axios.get(
+          `http://localhost:3001/posts/${postId}/related`
+        );
+        setRelatedPosts(relatedResponse.data.relatedPosts);
+      } catch (error) {
+        console.error("Error fetching post:", error);
+      }
+    };
+
+    fetchPost();
+  }, [postId]);
 
   const handleTagClick = (tag) => {
     navigate(`/search?query=${encodeURIComponent(tag)}`);
@@ -201,24 +227,50 @@ const PostDetail = () => {
       </div>
 
       <section className="mb-16">
-        <h2 className="text-2xl font-bold mb-4">Related Article</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Map through related articles here */}
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <img
-              src="path/to/image.jpg"
-              alt="Article"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">Article Title</h3>
-              <p className="text-gray-500">October 23, 2023</p>
-              <p className="text-gray-700 mt-2">
-                Brief description of the article...
-              </p>
+        <h2 className="text-2xl font-bold mb-4">Related Articles</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {relatedPosts.map((relatedPost) => (
+            <div
+              key={relatedPost._id}
+              className="bg-white shadow-lg rounded-lg overflow-hidden cursor-pointer"
+              onClick={() => navigate(`/post/${relatedPost._id}`)}
+            >
+              <img
+                src={
+                  relatedPost.image
+                    ? `http://localhost:3001/uploads/post/${relatedPost.image}`
+                    : relatedPost.imageUrl || "path/to/default/image.jpg"
+                }
+                alt={relatedPost.title}
+                className="w-full h-64 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {relatedPost.title}
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  {new Date(relatedPost.date).toLocaleDateString()}
+                </p>
+                <p className="text-gray-700 mt-2 text-sm">
+                  {relatedPost.excerpt || "No excerpt available."}
+                </p>
+                <div className="flex flex-wrap mt-4">
+                  {relatedPost.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Mencegah event klik pada div
+                        navigate(`/search?query=${encodeURIComponent(tag)}`); // Mengarahkan ke pencarian berdasarkan tag
+                      }}
+                      className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 cursor-pointer hover:bg-gray-300"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          {/* Repeat for other articles */}
+          ))}
         </div>
       </section>
     </div>
