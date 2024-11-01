@@ -3,7 +3,6 @@ const Like = require('../models/Like')
 const Bookmark = require('../models/Bookmark')
 const User = require('../models/User')
 
-
 const getPosts = async (req, res) => {
   try {
     // Ambil batas jumlah post dari query params
@@ -24,7 +23,6 @@ const getPosts = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 
 const getPostById = async (req, res) => {
@@ -89,6 +87,7 @@ const createPost = async (req, res) => {
 };
 
 
+
 const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -138,6 +137,8 @@ const updatePost = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 const searchPost = async (req, res) => {
   try {
@@ -266,8 +267,108 @@ const unlikePost = async (req, res) => {
   }
 };
 
+const unbookmarkPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    // Cek apakah user sudah melakukan bookmark pada postingan ini
+    const existingBookmark = await Bookmark.findOne({ postId, userId });
+    if (!existingBookmark) {
+      return res.status(400).json({ message: 'You have not bookmark this post yet' });
+    }
+
+    // Hapus like dari database
+    await Bookmark.findByIdAndDelete(existingBookmark._id);
+
+    // Kurangi jumlah like dari post dan totalLikes dari user
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { bookmark: existingBookmark._id }, $inc: { bookmarksCount: -1 } }, // Kurangi bookmark
+      { new: true }
+    );
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
 
 
+    res.status(200).json({ message: 'Bookmark removed successfully' });
+  } catch (error) {
+    console.error('Error unbookmark post:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const getLikePostsByUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // Pastikan userId diambil dari token autentikasi
+
+    // Cari semua like yang dilakukan oleh user
+    const likes = await Like.find({ userId }).populate('postId');
+
+    // Dapatkan data postingan dari like tersebut
+    const likedPosts = likes.map(like => like.postId);
+
+    res.status(200).json({ likedPosts });
+  } catch (error) {
+    console.error('Error fetching liked posts:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const getBookmarkPostsByUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // Pastikan userId diambil dari token autentikasi
+
+    // Cari semua bookmark yang dilakukan oleh user
+    const bookmark = await Bookmark.find({ userId }).populate('postId');
+
+    // Dapatkan data postingan dari like tersebut
+    const bookmarkPosts = bookmark.map(bookmark => bookmark.postId);
+
+    res.status(200).json({ bookmarkPosts });
+  } catch (error) {
+    console.error('Error fetching bookmark posts:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Temukan postingan berdasarkan ID
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Periksa apakah user yang sedang login adalah pemilik postingan
+    if (post.userId.toString() !== userId) {
+      return res.status(401).json({ message: 'Unauthorized to delete this post' });
+    }
+
+    // Kurangi totalLikes dari user yang memiliki postingan ini
+    await User.findByIdAndUpdate(post.userId, { $inc: { totalLikes: -post.likesCount } });
+
+    // Hapus semua likes yang terkait dengan postingan ini
+    await Like.deleteMany({ postId: id });
+
+    // Hapus semua bookmarks yang terkait dengan postingan ini
+    await Bookmark.deleteMany({ postId: id });
+
+    // Hapus postingan dari database
+    await Post.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Post and associated likes and bookmarks deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 
-module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,unlikePost,bookmarkPost };
+module.exports = { getPosts, getPostById, createPost, updatePost,searchPost,likePost,unlikePost,bookmarkPost,unbookmarkPost,getLikePostsByUser,getBookmarkPostsByUser,deletePost };

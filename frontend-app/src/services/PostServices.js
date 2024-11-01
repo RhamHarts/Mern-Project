@@ -45,6 +45,8 @@ export const toggleLikePost = async (postId) => {
   return response.json();
 };
 
+
+
 export const toggleUnlikePost = async (postId) => {
   console.log('Post ID:', postId);  // Log Post ID
   const response = await fetch(`http://localhost:3001/posts/${postId}/unlike`, {
@@ -66,6 +68,24 @@ export const toggleUnlikePost = async (postId) => {
 export const toggleBookmarkPost = async (postId) => {
   console.log('Post ID:', postId);  // Log Post ID
   const response = await fetch(`http://localhost:3001/posts/${postId}/bookmark`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`, // Pastikan token valid
+    },
+  });
+
+  if (!response.ok) {
+    console.error('Response status:', response.status);  // Log response status
+    throw new Error('Failed to toggle bookmark');
+  }
+
+  return response.json();
+};
+
+export const toggleUnbookmarkPost = async (postId) => {
+  console.log('Post ID:', postId);  // Log Post ID
+  const response = await fetch(`http://localhost:3001/posts/${postId}/unbookmark`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

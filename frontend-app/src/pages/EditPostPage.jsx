@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../context/authcontext";
+import { Editor } from "@tinymce/tinymce-react";
 
 const EditPostPage = () => {
   const { user } = useContext(AuthContext);
@@ -168,17 +169,86 @@ const EditPostPage = () => {
               className="h-14 text-5xl resize-none w-full bg-none focus:outline-none focus:border-transparent"
             ></textarea>
           </div>
+
+          {/* Mengganti textarea deskripsi dengan TinyMCE Editor */}
           <div className="mb-4">
-            <textarea
-              rows="5"
-              id="description"
-              placeholder="Enter Description"
+            <Editor
+              apiKey="9j7zq09rqgctd6t77u673k8jwu23ikix068j3aoaj3u2x49s"
+              initialValue=""
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              className="h-56 text-2xl resize-none w-full bg-none focus:outline-none focus:border-transparent"
-            ></textarea>
+              init={{
+                menubar: false,
+                plugins: [
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "preview",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "media",
+                  "table",
+                  "code",
+                  "help",
+                  "wordcount",
+                  "image",
+                ],
+                toolbar:
+                  "undo redo | blocks | " +
+                  "bold italic forecolor | alignleft aligncenter " +
+                  "alignright alignjustify | bullist numlist outdent indent | " +
+                  "removeformat | image ",
+                image_title: true,
+                automatic_uploads: true,
+                file_picker_types: "image",
+                file_picker_callback: (cb, value, meta) => {
+                  const input = document.createElement("input");
+                  input.setAttribute("type", "file");
+                  input.setAttribute("accept", "image/*");
+
+                  input.onchange = async function () {
+                    const file = this.files[0];
+                    const formData = new FormData();
+                    formData.append("image", file); // Make sure to match the key 'image'
+
+                    // Upload image to the server
+                    try {
+                      const response = await fetch(
+                        "http://localhost:3001/posts/upload-image",
+                        {
+                          method: "POST",
+                          body: formData,
+                        }
+                      );
+
+                      if (!response.ok) {
+                        throw new Error("Upload failed");
+                      }
+
+                      const data = await response.json();
+
+                      // Provide the image URL to TinyMCE
+                      cb(data.location, { title: file.name });
+                    } catch (error) {
+                      console.error("Error uploading image:", error);
+                    }
+                  };
+
+                  input.click();
+                },
+
+                placeholder: "Write Your Post...",
+              }}
+              onEditorChange={(newContent) => setDescription(newContent)}
+            />
           </div>
+
           <div className="mb-4">
             <label htmlFor="excerpt" className="block text-gray-700 mb-2">
               Excerpt

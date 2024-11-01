@@ -5,15 +5,18 @@ import {
   toggleLikePost,
   toggleUnlikePost, // Import the unlikePost function
   toggleBookmarkPost,
+  toggleUnbookmarkPost,
 } from "../services/PostServices"; // Import services
 import { Link, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify"; // Import DOMPurify
 import { FaHeart, FaBookmark, FaShare } from "react-icons/fa"; // Import icons
+import { marked } from "marked";
 
 const PostDetail = () => {
   const { postId } = useParams(); // Get postId from the route
   const [post, setPost] = useState(null); // State for storing post data
   const [likes, setLikes] = useState(0); // State for storing the likes count
+  const [bookmark, setBookmark] = useState(0); // State for storing the likes count
   const [isLiked, setIsLiked] = useState(false); // State for checking if the post is liked
   const [isBookmarked, setIsBookmarked] = useState(false); // State for bookmark status
   const navigate = useNavigate();
@@ -55,13 +58,27 @@ const PostDetail = () => {
     }
   };
 
-  // Toggle the bookmark status for the post
   const handleBookmarkClick = async () => {
     try {
-      const response = await toggleBookmarkPost(postId); // API call to toggle bookmark
-      console.log("Updated Bookmark Status:", response.isBookmarked);
-      setIsBookmarked(response.isBookmarked); // Update the bookmark status
-      setIsBookmarked(!isBookmarked); // Toggle the isBookmarked state
+      if (isBookmarked) {
+        // If already unbookmarked, unbookmark the post
+        const response = await toggleUnbookmarkPost(postId); // Call API to unlike post
+        console.log(
+          "Unbookmark successful. Updated bookmarks Count:",
+          response.bookmarksCount
+        );
+        setBookmark(response.bookmarksCount);
+        setIsBookmarked(false); // Update state to reflect that the post is now unliked
+      } else {
+        // If not liked, like the post
+        const response = await toggleBookmarkPost(postId); // API call to toggle like
+        console.log(
+          "Bookmark successful. Updated Bookmarks Count:",
+          response.bookmarksCount
+        );
+        setBookmark(response.bookmarksCount);
+        setIsBookmarked(true); // Update state to reflect that the post is now liked
+      }
     } catch (error) {
       console.error("Error toggling bookmark:", error.message || error);
     }
@@ -79,10 +96,12 @@ const PostDetail = () => {
         setPost(postData);
         setLikes(postData.likesCount || 0); // Set the likes count from the fetched data
         setIsLiked(postData.isLiked); // Update the initial like state
+        setBookmark(postData.bookmarksCount || 0);
         setIsBookmarked(postData.isBookmarked); // Update the initial bookmark state
 
         // Console log for likesCount, isLiked, and isBookmarked
         console.log("Likes Count:", postData.likesCount);
+        console.log("Bookmarks Count:", postData.bookmarksCount);
         console.log("User has liked this post:", postData.isLiked);
         console.log("User has bookmarked this post:", postData.isBookmarked); // Log untuk bookmark
       } catch (error) {
@@ -97,20 +116,21 @@ const PostDetail = () => {
     return <div>Loading...</div>;
   }
 
-  const cleanDescription = DOMPurify.sanitize(post.description); // Sanitize post description for security
-
   return (
-    <div className="container mx-auto px-96">
-      <h1 className="text-4xl font-bold mb-4 mt-10">{post.title}</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="text-center">
+        {/* <span className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full mb-2">
+          Popular Articles
+        </span> */}
+        <h1 className="text-4xl font-bold mb-5">{post.title}</h1>
+      </div>
 
       <img
-        className="w-full mb-4 mt-10"
+        className="w-full mb-8"
         src={
           post.image
             ? `http://localhost:3001/uploads/post/${post.image}`
-            : post.imageUrl
-            ? post.imageUrl
-            : "path/to/default/image.jpg"
+            : post.imageUrl || "path/to/default/image.jpg"
         }
         alt={post.title}
       />
@@ -166,12 +186,9 @@ const PostDetail = () => {
         </div>
       </div>
 
-      <div
-        className="text-gray-700 text-base leading-relaxed mb-4 text-left"
-        dangerouslySetInnerHTML={{ __html: cleanDescription }}
-      />
+      <div dangerouslySetInnerHTML={{ __html: marked(post.description) }} />
 
-      <div className="flex flex-wrap mb-4">
+      <div className="flex flex-wrap mt-10 mb-10">
         {post.tags.map((tag, index) => (
           <span
             key={index}
@@ -183,14 +200,28 @@ const PostDetail = () => {
         ))}
       </div>
 
-      <Link
-        to={`/post/edit/${post._id}`}
-        className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition duration-300 ease-in-out"
-      >
-        Edit Post
-      </Link>
+      <section className="mb-16">
+        <h2 className="text-2xl font-bold mb-4">Related Article</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Map through related articles here */}
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <img
+              src="path/to/image.jpg"
+              alt="Article"
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="text-lg font-semibold">Article Title</h3>
+              <p className="text-gray-500">October 23, 2023</p>
+              <p className="text-gray-700 mt-2">
+                Brief description of the article...
+              </p>
+            </div>
+          </div>
+          {/* Repeat for other articles */}
+        </div>
+      </section>
     </div>
   );
 };
-
 export default PostDetail;

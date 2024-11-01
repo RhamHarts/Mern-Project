@@ -1,16 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/authcontext";
 
 const ProfilePage = () => {
   const { id } = useParams();
+  const { user } = useContext(AuthContext);
+
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [totalLikes, setTotalLikes] = useState(0);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("posts"); // Tab state
+
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
 
   const navigate = useNavigate();
 
@@ -111,6 +119,34 @@ const ProfilePage = () => {
     } catch (error) {
       console.error("Error fetching followers and following counts:", error);
     }
+  };
+
+  const truncateText = (text, numWords) => {
+    if (!text) return "";
+    const words = text.split(" ");
+    if (words.length <= numWords) return text;
+    return words.slice(0, numWords).join(" ") + "...";
+  };
+
+  const handleTagClick = (tag) => {
+    if (!user) {
+      setIsModalOpen(true);
+    } else {
+      navigate(`/search?query=${encodeURIComponent(tag)}`);
+    }
+  };
+
+  const handlePostClick = (post) => {
+    if (!user) {
+      setIsModalOpen(true);
+    } else {
+      navigate(`/post/${post._id}`);
+    }
+  };
+
+  // Fungsi untuk mengubah tab aktif
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
   };
 
   if (!profile) return <div>Loading profile...</div>;
@@ -274,32 +310,193 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="container mx-auto p-4">
-        <h2 className="text-2xl font-bold mb-4">My Posts</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {posts.map((post) => (
-            <div
-              key={post._id}
-              onClick={() => navigate(`/post/${post._id}`)}
-              className="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer"
-            >
-              <img
-                className="w-full h-80 object-cover"
-                src={`http://localhost:3001/uploads/post/${
-                  post.image || "path/to/default/image.jpg"
-                }`}
-                alt={post.title}
-              />
-              <div className="px-6 py-4">
-                <div className="font-bold text-xl mb-2">{post.title}</div>
-                <p className="text-gray-700 text-base">{post.excerpt}</p>
-                <span className="text-gray-600 text-sm">
-                  {new Date(post.date).toLocaleDateString()}
-                </span>
-                {/* Tags */}
-              </div>
+      {/* Section Tab Navigation */}
+      <div className="w-2/3 p-4">
+        <div className="flex justify-around border-b mb-4">
+          <button
+            onClick={() => handleTabClick("posts")}
+            className={`p-2 w-full ${
+              activeTab === "posts"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : "text-gray-500"
+            }`}
+          >
+            Posts
+          </button>
+          <button
+            onClick={() => handleTabClick("liked")}
+            className={`p-2 w-full ${
+              activeTab === "liked"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : "text-gray-500"
+            }`}
+          >
+            Liked Posts
+          </button>
+          <button
+            onClick={() => handleTabClick("bookmarks")}
+            className={`p-2 w-full ${
+              activeTab === "bookmarks"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : "text-gray-500"
+            }`}
+          >
+            Bookmarks
+          </button>
+        </div>
+
+        {/* Content for each section */}
+        <div className="mt-4">
+          {activeTab === "posts" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {posts.map((post) => (
+                <div
+                  key={post._id} // Pastikan _id unik
+                  onClick={() => handlePostClick(post)}
+                  className="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer"
+                >
+                  <div className="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer">
+                    <img
+                      className="w-full h-80 object-cover"
+                      src={
+                        post.image // Check for image first
+                          ? `http://localhost:3001/uploads/post/${post.image}`
+                          : post.imageUrl // If no image, check for imageUrl
+                          ? post.imageUrl
+                          : "path/to/default/image.jpg" // Provide a default image in case both are missing
+                      }
+                      alt={post.title}
+                    />
+                    <div className="px-6 py-4">
+                      <div className="font-bold text-xl mb-2">{post.title}</div>
+                      <p className="text-gray-700 text-base">
+                        {truncateText(post.excerpt, 20)}
+                      </p>
+                    </div>
+                    <div className="px-6 py-4">
+                      <span className="text-gray-600 text-sm">
+                        {new Date(post.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="px-6 pt-4 pb-2">
+                      {post.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTagClick(tag);
+                          }}
+                          className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          {activeTab === "liked" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {likedPosts
+                .filter((post) => post)
+                .map((post) => (
+                  <div
+                    key={post._id}
+                    onClick={() => handlePostClick(post)}
+                    className="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer"
+                  >
+                    <img
+                      className="w-full h-80 object-cover"
+                      src={
+                        post.image
+                          ? `http://localhost:3001/uploads/post/${post.image}`
+                          : post.imageUrl
+                          ? post.imageUrl
+                          : "path/to/default/image.jpg"
+                      }
+                      alt={post.title}
+                    />
+                    <div className="px-6 py-4">
+                      <div className="font-bold text-xl mb-2">{post.title}</div>
+                      <p className="text-gray-700 text-base">
+                        {truncateText(post.excerpt, 20)}
+                      </p>
+                    </div>
+                    <div className="px-6 py-4">
+                      <span className="text-gray-600 text-sm">
+                        {new Date(post.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="px-6 pt-4 pb-2">
+                      {post.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTagClick(tag);
+                          }}
+                          className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+          {activeTab === "bookmarks" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {bookmarkedPosts
+                .filter((post) => post)
+                .map((post) => (
+                  <div
+                    key={post._id}
+                    onClick={() => handlePostClick(post)}
+                    className="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer"
+                  >
+                    <img
+                      className="w-full h-80 object-cover"
+                      src={
+                        post.image
+                          ? `http://localhost:3001/uploads/post/${post.image}`
+                          : post.imageUrl
+                          ? post.imageUrl
+                          : "path/to/default/image.jpg"
+                      }
+                      alt={post.title}
+                    />
+                    <div className="px-6 py-4">
+                      <div className="font-bold text-xl mb-2">{post.title}</div>
+                      <p className="text-gray-700 text-base">
+                        {truncateText(post.excerpt, 20)}
+                      </p>
+                    </div>
+                    <div className="px-6 py-4">
+                      <span className="text-gray-600 text-sm">
+                        {new Date(post.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="px-6 pt-4 pb-2">
+                      {post.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTagClick(tag);
+                          }}
+                          className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2 cursor-pointer"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
